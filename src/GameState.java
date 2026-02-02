@@ -19,7 +19,7 @@ public class GameState {
     private static int getNumberOfHumanPlayers(Scanner sc){
         int humanPlayers = -1;
         while (true) {
-            humanPlayers = getInt("Enter number of Human players(1/2/3/4):", "Not a valid int", sc);
+            humanPlayers = getInt("Enter number of Human players(1/2/3/4): ", "Not a valid int", sc);
             if (humanPlayers >= 1 && humanPlayers <= 4) {
                 break;
             }
@@ -33,7 +33,7 @@ public class GameState {
         int computerPlayers = -1;
         int maxComputerPlayers = 4 - humanPlayers;
         while (true) {
-            computerPlayers = getInt(String.format("Enter number of Computer players(%d to %d):", 0 , maxComputerPlayers), 
+            computerPlayers = getInt(String.format("Enter number of Computer players(%d to %d): ", 0 , maxComputerPlayers), 
             "Not a valid int", sc);
             if (computerPlayers >= 0 && computerPlayers <= maxComputerPlayers) {
                 break;
@@ -45,13 +45,13 @@ public class GameState {
     }
 
     public static void main(String[] args) {
-        System.out.print("Hello player");
+        System.out.println("===== SPLENDOR =====");
         Scanner sc = new Scanner(System.in);
         int humanPlayers = getNumberOfHumanPlayers(sc);
         int computerPlayers = getNumberOfComputerPlayers(humanPlayers, sc);
         
-        // System.out.printf("Human players: %d\n", humanPlayers);
-        // System.out.printf("Computer players: %d\n", computerPlayers);
+        System.out.printf("Human players: %d\n", humanPlayers);
+        System.out.printf("Computer players: %d\n", computerPlayers);
         
         
     }
