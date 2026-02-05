@@ -1,5 +1,6 @@
-import java.util.*;
+package src.com.splendor.model;
 
+import java.util.*;
 
 public class Player{
     private int playerID;

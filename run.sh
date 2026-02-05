@@ -1,0 +1,1 @@
+java -cp "classes:resources" src/com/splendor/game/GameState
