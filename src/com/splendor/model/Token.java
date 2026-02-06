@@ -11,16 +11,26 @@ public class Token {
     private static int whiteCount;
     private static int goldCount;
 
-    public Token(int totalPlayerCount) {
+    public static void initialise(int playerCount) {
+        // init token counts
+
+        // 2 players: 4x tokens per gem type
+        // 3 players: 5x tokens per gem type
+        // 4 players: 7x tokens per gem type
+        // NOTE: these default settings can be changed in config.properties file 
         DataLoader dloader = new DataLoader();
 
-        String key = String.format("game.tokenCount.%dplayers", totalPlayerCount);
+        String key = String.format("game.tokenCount.%dplayers", playerCount);
         int tokenCount = Integer.parseInt(dloader.getProperty(key));
-        this.blackCount = tokenCount;
-        this.blueCount = tokenCount;
-        this.greenCount = tokenCount;
-        this.redCount = tokenCount;
-        this.whiteCount = tokenCount;
-        this.goldCount = Integer.parseInt(dloader.getProperty("game.tokenCount.gold"));
+        Token.blackCount = tokenCount;
+        Token.blueCount = tokenCount;
+        Token.greenCount = tokenCount;
+        Token.redCount = tokenCount;
+        Token.whiteCount = tokenCount;
+        Token.goldCount = Integer.parseInt(dloader.getProperty("game.tokenCount.gold"));
+    }
+
+    public Token() {
+
     }
 }
