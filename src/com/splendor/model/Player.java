@@ -38,7 +38,42 @@ public class Player{
         return nobles;
     }
 
-    
+
+
+    // added by vg 14/2
+
+
+    public void addToken(Token token){
+        tokens.add(token);
+    }
+
+    public void addReservedCard(Card card){
+        this.reservedCards.add(card);
+    }
+
+    public void removeReservedCard(Card card){
+        this.reservedCards.remove(card);
+    }
+
+    public void addBoughtCard(Card card){
+        this.boughtCards.add(card);
+        this.prestigePoints += card.getPrestigePoints();
+    }
+
+    public void addNoble(Noble noble){
+        this.nobles.add(noble);
+        this.prestigePoints += noble.getPrestigePoints();
+    }
+
+    // check token count
+    public int getTokenCount(){
+        int count = 0;
+        for(Token token : tokens){
+            count++;
+        }
+        return count;  
+    }
+
 
 
 }

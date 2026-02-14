@@ -1,0 +1,1 @@
+javac -d "classes" -cp "." src\com\splendor\game\GameState.java
