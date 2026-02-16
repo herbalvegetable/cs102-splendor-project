@@ -67,11 +67,7 @@ public class Player{
 
     // check token count
     public int getTokenCount(){
-        int count = 0;
-        for(Token token : tokens){
-            count++;
-        }
-        return count;  
+        return 0;
     }
 
 
