@@ -10,9 +10,9 @@ public class PlayerTurn {
     }
     
     public void executeAction(Player player) {
-        boolean validAction = false;
+        int validAction = -1;
         
-        while (!validAction) {
+        while (validAction < 0) {
             displayActionMenu(); // prompt user to choose the action he wants to do
             
             if(!sc.hasNextInt()){
@@ -83,7 +83,7 @@ public class PlayerTurn {
     
 
     // Action 1: take 3 diff tokens
-    private boolean take3DifferentTokens(Player player) {
+    private int take3DifferentTokens(Player player) {
         System.out.println("\nAvailable colors: black, blue, green, red, white");
         System.out.print("Enter 3 different colors (separated by spaces): ");
         String input = sc.nextLine();
@@ -92,21 +92,21 @@ public class PlayerTurn {
         // Validate input
         if (gemTypes.length != 3) {
             System.out.println("Please select exactly 3 gem types.");
-            return false;
+            return -1;
         }
         
         // Check for duplicates
         Set<String> uniqueTypes = new HashSet<>(Arrays.asList(gemTypes));
         if (uniqueTypes.size() != 3) {
             System.out.println("All 3 gem types must be different.");
-            return false;
+            return -1;
         }
 
         // Check if gemtypes are valid
         for (String gemType : gemTypes) {
             if (!Token.checkGemType(gemType)){   //checkGemType is in Token.java
                 System.out.println("Please enter valid gem types");
-                return false;
+                return -1;
             }
         }
         
@@ -114,7 +114,7 @@ public class PlayerTurn {
         for (String gemType : gemTypes) {
             if (TokenPile.getTokenCount(gemType) < 1) {
                 System.out.println("Not enough " + gemType + " tokens available.");
-                return false;
+                return -1;
             }
         }
         
@@ -125,11 +125,11 @@ public class PlayerTurn {
         }
         
         System.out.println("Tokens taken successfully!");
-        return true;
+        return 1;
     }
     
     // Action 2: take 2 of the same tokens
-    private boolean take2SameTokens(Player player) {
+    private int take2SameTokens(Player player) {
         System.out.println("\nAvailable gemType: black, blue, green, red, white");
         System.out.println("You can choose ONE ONLY");
         System.out.print("Enter gemType: ");
@@ -138,7 +138,7 @@ public class PlayerTurn {
         // Check if 4 tokens of that gemType are available
         if (TokenPile.getTokenCount(gemType) < 4) {
             System.out.println("There must be at least 4 " + gemType + " tokens available to take 2.");
-            return false;
+            return -1;
         }
         
         // Take 2 tokens
@@ -147,16 +147,16 @@ public class PlayerTurn {
         player.addToken(new Token(gemType));
         
         System.out.println("2 " + gemType + " tokens taken successfully!");
-        return true;
+        return 2;
     }
 
 
     // Action 3: reserve card 
-    private boolean reserveCard(Player player) {
+    private int reserveCard(Player player) {
         // Check if player can reserve (max 3)
         if (player.getReservedCards().size() >= 3) {
             System.out.println("You already have 3 reserved cards (maximum).");
-            return false;
+            return -1;
         }
         
         System.out.println("\nReserve from which level?");
@@ -165,7 +165,7 @@ public class PlayerTurn {
         if(!sc.hasNextInt()){ // check if user input an int
             System.out.println("Invalid input.");
             sc.next();
-            return false;
+            return -1;
         }
         
         int level = sc.nextInt();
@@ -174,7 +174,7 @@ public class PlayerTurn {
         ArrayList<Card> openCards = getOpenCardsByLevel(level); /////
         if (openCards == null || openCards.isEmpty()) {
             System.out.println("No cards available at this level."); // incase the level runs out, shouldnt be the case
-            return false;
+            return -1;
         }
         
         System.out.print("Enter card index (0-" + (openCards.size()-1) + "): "); //index of card is printed, see gamestate
@@ -182,7 +182,7 @@ public class PlayerTurn {
         if(!sc.hasNextInt()){
             System.out.println("Invalid input.");
             sc.next();
-            return false;
+            return -1;
         }
         
         int index = sc.nextInt();
@@ -190,7 +190,7 @@ public class PlayerTurn {
         
         if (index < 0 || index >= openCards.size()) {
             System.out.println("Invalid card index.");
-            return false;
+            return -1;
         }
         
         // Reserve the card
@@ -209,7 +209,7 @@ public class PlayerTurn {
         // Refill the card slot
         Card.transferFromClosedToOpen(getClosedCardsByLevel(level), openCards); // refill the open cards
         
-        return true;
+        return 3;
     }
 
     private ArrayList<Card> getOpenCardsByLevel(int level) {
@@ -232,8 +232,8 @@ public class PlayerTurn {
     
 
     // Action 4: Buy card //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    private boolean buyCard(Player player) {
-        return false;
+    private int buyCard(Player player) {
+        return -1;
         /* this one is tough, good luck
             function should return true if successfully buy card,
             in any case where player inputs something wrong/ not enough tokens, 

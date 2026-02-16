@@ -71,7 +71,7 @@ public class GameState {
 
     // added by vg 14/2 ///////////////////////////////////////////////////////////////////////////////////////////////
     // display current board state
-    public static void displayCurrentBoardState() {
+    public static void displayCurrentBoardState() { 
         System.out.println("\n--- GAME BOARD ---");
 
          // display available tokens
@@ -126,7 +126,7 @@ public class GameState {
     }
 
     private void checkGameEnd(){
-        if (currentPlayerIndex == 4) { // THIS IS JUST TEMPORARY CODE SO THAT I CAN TEST IT, NEED TO WRITE A REAL 
+        if (currentPlayerIndex == 3) { // THIS IS JUST TEMPORARY CODE SO THAT I CAN TEST IT, NEED TO WRITE A REAL 
             gameOver = true;            // CHECK END GAME FUNCTION
         }
     };
@@ -174,6 +174,11 @@ public class GameState {
         PlayerTurn currentTurn = new PlayerTurn(sc);
         currentTurn.executeAction(currentPlayer);
         
+        displayChangeInBoard();
+    }
+
+    private void displayChangeInBoard(){
+
         
     }
 
