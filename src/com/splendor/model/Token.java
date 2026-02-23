@@ -32,4 +32,8 @@ public class Token {
     public String getGemType(){
         return this.gemType;
     }
+
+    public String toString() {
+        return gemType;
+    }
 }

@@ -135,4 +135,7 @@ public class Card {
         return purchasePrice;
     }
 
+    public String toString() {
+        return "Level: " + level + " | Gem Type: " + gemType + " | Points: " + prestigePoints + " | Price: " + purchasePrice;
+    }
 }

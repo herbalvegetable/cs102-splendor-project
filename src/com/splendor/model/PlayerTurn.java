@@ -1,11 +1,16 @@
 package src.com.splendor.model;
 
 import java.util.*;
+import src.com.splendor.game.DataLoader;
 
 public class PlayerTurn {
     private Scanner sc;
+    private int maxTokenCount;
     
     public PlayerTurn(Scanner sc) {
+        DataLoader dloader = new DataLoader();
+        this.maxTokenCount = Integer.parseInt(dloader.getProperty("game.maxTokensPerPlayer"));
+        
         this.sc = sc;
     }
     
@@ -16,7 +21,7 @@ public class PlayerTurn {
             displayActionMenu(); // prompt user to choose the action he wants to do
             
             if(!sc.hasNextInt()){
-                System.out.println("Invalid input. Please enter a number (1 - 4):"); // catch of the user enters a NON number
+                System.out.println("Invalid input. Please enter a number (1 - 4):"); // catch if the user enters a NON number
                 sc.next();
                 continue;
             }
@@ -48,10 +53,10 @@ public class PlayerTurn {
         }
         
         // Handle token limit (max 10)
-        if(player.getTokens().size() > 10){
-            System.out.printf("You have %d tokens over the limit of 10\n", player.getTokens().size() % 10);
+        if(player.getTokens().size() > this.maxTokenCount){
+            System.out.printf("You have %d tokens over the limit of 10\n", player.getTokens().size() % this.maxTokenCount);
             System.out.printf("You need to discard them");
-            while (player.getTokens().size() > 10) {
+            while (player.getTokens().size() > this.maxTokenCount) {
                 returnTokens(player);
             }
         }
@@ -232,15 +237,235 @@ public class PlayerTurn {
     
 
     // Action 4: Buy card //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Added by Raymond 18/2 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private int buyCard(Player player) {
+
+        // Step 1: Player chooses to buy from reserve pile or from board
+        System.out.println("\n--- CHOOSE BUY ACTION ---");
+        System.out.println("1. Buy from Marketplace");
+        System.out.println("2. Buy from Reserved Cards");
+        System.out.print("Enter choice (1 or 2): "); // for choice 1 look at 'a' steps, choice 2 look at 'b' steps
+
+        if(!sc.hasNextInt()){ // check if user input an int
+            System.out.println("Invalid input.");
+            sc.next();
+            return -1;
+        }
+
+        int buyAction = sc.nextInt();
+        sc.nextLine();
+
+        // Step 2a: Player chooses a card to buy from Marketplace
+        if (buyAction == 1) {
+        System.out.println("\n--- SELECT WHICH CARD LEVEL TO BUY FROM---");
+        System.out.println("My tokens: " + player.getTokens());
+        System.out.println("My bought cards: " + player.getBoughtCards());
+        System.out.print("Enter level (1/2/3): ");
+        
+        if(!sc.hasNextInt()){ // check if user input an int
+            System.out.println("Invalid input.");
+            sc.next();
+            return -1;
+        }
+        
+        int level = sc.nextInt();
+        sc.nextLine();
+        
+        ArrayList<Card> openCards = getOpenCardsByLevel(level);
+        if (openCards == null || openCards.isEmpty()) {
+            System.out.println("No cards available at this level."); // incase the level runs out, shouldnt be the case
+            return -1;
+        }
+        
+        System.out.print("Enter card index (0-" + (openCards.size()-1) + "): "); //index of card is printed, see gamestate
+        
+        if(!sc.hasNextInt()){
+            System.out.println("Invalid input.");
+            sc.next();
+            return -1;
+        }
+        
+        int index = sc.nextInt();
+        sc.nextLine();
+        
+        if (index < 0 || index >= openCards.size()) {
+            System.out.println("Invalid card index.");
+            return -1;
+        }
+
+        Card card = openCards.get(index); // store card
+        
+        // Step 3a: Check if player has enough resources to buy the card
+        int playerTokenGoldValue = player.getGoldTokenCount();
+            for (int i = 0; i < 5; i++) {
+                int selectedOpenCardSingleGemValue = card.getPurchasePrice().charAt(i) - '0';
+                int playerPermanentSingleGemValue = player.getBoughtCardsGemValueCount(i);
+
+                int remainingCost = selectedOpenCardSingleGemValue - playerPermanentSingleGemValue;
+
+                if (remainingCost < 0) {
+                    remainingCost = 0;
+                }
+
+                int playerTokenSingleGemValue = player.getGemTokenCount(i);
+                
+                if (playerTokenSingleGemValue >= remainingCost){
+                    continue;
+                }
+
+                int shortage = remainingCost - playerTokenSingleGemValue;
+
+                if (playerTokenGoldValue >= shortage) {
+                    playerTokenGoldValue -= shortage;
+                } else {
+                    System.out.println("Not enough Gems to purchase. Please select another card.");
+                    return -1;
+                }
+            }
+        // Step 4a: Confirm purchase with player
+            System.out.println("Purchase possible. Enter any key to confirm. Enter \"N\" to cancel.");
+            String input = sc.nextLine();
+
+            if (input.equalsIgnoreCase("N")) {
+                System.out.println("Purchase Cancelled.");
+                return -1;
+            } else {
+                System.out.println("Purchase Confirmed!");
+            }
+
+            // Step 5a: Remove used tokens from player
+            for (int i = 0; i < 5; i++) {
+                int selectedOpenCardSingleGemValue = card.getPurchasePrice().charAt(i) - '0';
+                int playerPermanentSingleGemValue = player.getBoughtCardsGemValueCount(i);
+
+                int remainingCost = selectedOpenCardSingleGemValue - playerPermanentSingleGemValue;
+
+                if (remainingCost < 0) {
+                    remainingCost = 0;
+                }
+
+                int playerTokenSingleGemValue = player.getGemTokenCount(i);
+
+                int tokensToRemove = Math.min(playerTokenSingleGemValue, remainingCost);
+
+                player.removePlayerTokens(i, tokensToRemove);
+
+                int stillOwed = remainingCost - tokensToRemove;
+
+                if (stillOwed > 0) {
+                    player.removePlayerTokens(5, stillOwed); // gold index
+                }
+            } 
+
+            // Step 6a: Transfer card from Marketplace to player
+            openCards.remove(index);
+            player.addBoughtCard(card);
+            Card.transferFromClosedToOpen(getClosedCardsByLevel(level), openCards); // refill the open cards
+            System.out.println(player.getBoughtCards());
+            return 4;
+        }
+
+        // Step 2b: Player chooses a card to buy from own Reserved Cards
+        if (buyAction == 2) {
+            if (player.getReservedCards().isEmpty()) {
+                System.out.println("\nYou have no reserved cards at the moment.");
+                return -1;
+            }
+
+            System.out.println("\n--- SELECT WHICH RESERVED CARD TO BUY ---");
+            System.out.println("My reserved cards: " + player.getReservedCards());
+            System.out.println("My tokens: " + player.getTokens());
+            System.out.println("My bought cards: " + player.getBoughtCards());
+            System.out.printf("Enter card index (0-%d)\n", player.getReservedCards().size() - 1);
+
+            if(!sc.hasNextInt()){ // check if user input an int
+                System.out.println("Invalid input.");
+                sc.next();
+                return -1;
+            }
+
+            int index = sc.nextInt();
+            sc.nextLine();
+
+            if (index > player.getReservedCards().size() - 1) { // check if valid index
+                System.out.println("Invalid index.");
+                return -1;
+            }
+
+            // Step 3b: Check if player has enough resources for purchase
+            int playerTokenGoldValue = player.getGoldTokenCount();
+            for (int i = 0; i < 5; i++) {
+                int selectedReservedCardSingleGemValue = player.getReservedCards().get(index).getPurchasePrice().charAt(i) - '0';
+                int playerPermanentSingleGemValue = player.getBoughtCardsGemValueCount(i);
+
+                int remainingCost = selectedReservedCardSingleGemValue - playerPermanentSingleGemValue;
+
+                if (remainingCost < 0) {
+                    remainingCost = 0;
+                }
+
+                int playerTokenSingleGemValue = player.getGemTokenCount(i);
+                
+                if (playerTokenSingleGemValue >= remainingCost){
+                    continue;
+                }
+
+                int shortage = remainingCost - playerTokenSingleGemValue;
+
+                if (playerTokenGoldValue >= shortage) {
+                    playerTokenGoldValue -= shortage;
+                } else {
+                    System.out.println("Not enough Gems to purchase. Please select another card.");
+                    return -1;
+                }
+            }
+            // Step 4b: Confirm purchase with player
+            System.out.println("Purchase possible. Enter any key to confirm. Enter \"N\" to cancel.");
+            String input = sc.nextLine();
+
+            if (input.equalsIgnoreCase("N")) {
+                System.out.println("Purchase Cancelled.");
+                return -1;
+            } else {
+                System.out.println("Purchase Confirmed!");
+            }
+
+            // Step 5b: Remove used tokens from player
+            for (int i = 0; i < 5; i++) {
+                int selectedReservedCardSingleGemValue = player.getReservedCards().get(index).getPurchasePrice().charAt(i) - '0';
+                int playerPermanentSingleGemValue = player.getBoughtCardsGemValueCount(i);
+
+                int remainingCost = selectedReservedCardSingleGemValue - playerPermanentSingleGemValue;
+
+                if (remainingCost < 0) {
+                    remainingCost = 0;
+                }
+
+                int playerTokenSingleGemValue = player.getGemTokenCount(i);
+
+                int tokensToRemove = Math.min(playerTokenSingleGemValue, remainingCost);
+
+                player.removePlayerTokens(i, tokensToRemove);
+
+                int stillOwed = remainingCost - tokensToRemove;
+
+                if (stillOwed > 0) {
+                    player.removePlayerTokens(5, stillOwed); // gold index
+                }
+            }
+
+            // Step 6b: Transfer card from reserved to player
+            Card card = player.getReservedCards().get(index);
+            player.removeReservedCard(card);
+            player.addBoughtCard(card);
+            System.out.println(player.getBoughtCards());
+            return 4;
+        }
+
+        System.out.println("Invalid Buy Action number. Try Again.");
         return -1;
-        /* this one is tough, good luck
-            function should return true if successfully buy card,
-            in any case where player inputs something wrong/ not enough tokens, 
-            just return false, the player turn will auto go back to
-            prompt player to choose 1 of 4 actions
-        */
     }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
     
   

@@ -12,6 +12,14 @@ public class Player{
 
     public Player(int playerID){
         this.playerID = playerID;
+
+        //DEBUG
+        // String[] gemTypes = {"black", "blue", "green", "red", "white"};
+        // for (int i = 0; i < 5; i++) {
+        //     for (int j = 0; j < 10; j++) {
+        //         tokens.add(new Token(gemTypes[i]));
+        //     }
+        // }
     }
 
     public int getPlayerID() {
@@ -65,11 +73,58 @@ public class Player{
         this.prestigePoints += noble.getPrestigePoints();
     }
 
+// Added by Raymond 18/2 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     // check token count
-    public int getTokenCount(){
-        return 0;
+    public int getGemTokenCount(int gemTypeIndex){ // index is the index of the specific gemType in the String array below
+        String[] gemTypes = {"black", "blue", "green", "red", "white"};
+        String targetGem = gemTypes[gemTypeIndex];
+        int count = 0;
+        for (Token token : tokens) {
+            if (token.getGemType().equals(targetGem)) {
+                count++;
+            }
+        }
+        return count;
     }
 
+    // check gold token count, kept seperate from getGemTokenCount
+    public int getGoldTokenCount(){
+        int count = 0;
+        for (Token token : tokens) {
+            if (token.getGemType().equals("gold")) {
+                count++;
+            }
+        }
+        return count;
+    }
 
+    public int getBoughtCardsGemValueCount(int gemTypeIndex) {
+        String[] gemTypes = {"black", "blue", "green", "red", "white"};
+        String targetGem = gemTypes[gemTypeIndex];
+        int count = 0;
 
+        for (Card card : boughtCards) {
+            if (card.getGemType().toLowerCase().equals(targetGem)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public void removePlayerTokens(int gemTypeIndex, int numberOfTokens) {
+        String[] gemTypes = {"black", "blue", "green", "red", "white", "gold"};
+        String targetGem = gemTypes[gemTypeIndex];
+
+        int removed = 0;
+
+        for (int i = getTokens().size() - 1; i >= 0 && removed < numberOfTokens; i--) {
+            if (getTokens().get(i).getGemType().equals(targetGem)) {
+                getTokens().remove(i);
+                TokenPile.addToken(targetGem, 1);
+                removed++;
+            }
+        }
+    }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
