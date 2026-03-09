@@ -64,7 +64,7 @@ public class PlayerTurn {
     }
 
     // Handle token limit (max 10)
-    private static void returnTokens(Player player){
+    private void returnTokens(Player player){
         /* need to write a function that will
             1) make player choose what gemType token he wants to return
             2) check if player actually has that gemType
@@ -74,6 +74,48 @@ public class PlayerTurn {
 
             note: no need to loop, this function is to discard ONE token ONLY
         */
+       Boolean availtoken = false;
+       String[] gemTypes = {"black", "blue", "green", "red", "white", "gold"};
+
+       while (!availtoken) {
+            System.out.println("\nAvailable colors: black, blue, green, red, white");
+            System.out.print("\n Choose Token to Return: ");
+            String returntoken = sc.nextLine();
+
+            int gemIndex = -1;
+        
+            //checks input with gemtype 
+            for (int i = 0; i < gemTypes.length; i++) {
+                if (gemTypes[i].equals(returntoken)) {
+                    gemIndex = i;
+                    break;
+                }
+            }
+
+            if (gemIndex == -1) {
+                System.out.println("\nIncorrect Gem Type. Try again.");
+                continue;
+            }
+
+            //checks if token is available and if not ask to try again
+            if (gemIndex == 5) {
+                if (player.getGoldTokenCount() > 0) {
+                    player.removePlayerTokens(gemIndex, 1);
+                    availtoken = true;
+                } else {
+                    System.out.println("Insufficient Gold Token. Try Again.");
+                }  
+            } else {
+                if (player.getGemTokenCount(gemIndex) > 0) {
+                    player.removePlayerTokens(gemIndex, 1);
+                    availtoken = true;
+                } else {
+                    System.out.println("Insufficient " + returntoken + "Token. Try Again.");
+                }
+
+            }
+    
+        }
 
     }
     

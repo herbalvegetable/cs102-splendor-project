@@ -118,18 +118,55 @@ public class GameState {
         }
     }
 
-    // a method to print out player's inventory eg. tokens, points, nobles //reminder to create
+    // method to print out player's inventory eg. tokens, points, nobles 
     private void displayPlayerState(Player player){
 
+        Player currentPlayer = players.get(currentPlayerIndex);
+
+        System.out.println("\n--- PLAYER " + currentPlayer.getPlayerID() + " INVENTORY ---");
+
+        //Display Player Tokens
+        System.out.println("\nCurrent Tokens:\n");
+
+        System.out.printf(" Black: %d | Blue: %d | Green: %d | Red: %d | White: %d | Gold: %d%n", 
+            currentPlayer.getGemTokenCount(0),
+            currentPlayer.getGemTokenCount(1),
+            currentPlayer.getGemTokenCount(2),
+            currentPlayer.getGemTokenCount(3),
+            currentPlayer.getGemTokenCount(4),
+            currentPlayer.getGoldTokenCount()
+        );
+
+
+        //Display Player points
+
+        System.out.println("\nPrestige Points: " + currentPlayer.getPrestigePoints());
+
+
+        //Display Player nobles
+        System.out.println("\nPlayer Nobles: ");
+        for (Noble noble : currentPlayer.getNobles()) {
+            System.out.println("\n" + noble);
+        }
 
 
     }
 
+    //Checks if anyone reaches 15 prestige points at end of each round
     private void checkGameEnd(){
-        if (currentPlayerIndex == 3) { // THIS IS JUST TEMPORARY CODE SO THAT I CAN TEST IT, NEED TO WRITE A REAL 
-            gameOver = true;            // CHECK END GAME FUNCTION
+        for (Player player : players) {
+            if (player.getPrestigePoints() >= 15) {
+                gameOver = true;
+            }
         }
+        // if (currentPlayerIndex == 3) { // THIS IS JUST TEMPORARY CODE SO THAT I CAN TEST IT, NEED TO WRITE A REAL 
+        //     gameOver = true;            // CHECK END GAME FUNCTION
+        // }
     };
+
+    //Need to Complete: Calculate Winner
+
+    
     
 
     // MAIN GAME LOOP, CRUCIAL
@@ -177,6 +214,7 @@ public class GameState {
         displayChangeInBoard();
     }
 
+    //isnt this repeat of current?
     private void displayChangeInBoard(){
 
         

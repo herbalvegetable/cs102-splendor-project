@@ -68,6 +68,7 @@ public class Player{
         this.prestigePoints += card.getPrestigePoints();
     }
 
+    //To-do: Noble must be automatically gained once enough bonus is received 
     public void addNoble(Noble noble){
         this.nobles.add(noble);
         this.prestigePoints += noble.getPrestigePoints();

@@ -84,4 +84,11 @@ public class Noble {
         return prestigePoints;
     }
 
+
+
+    //to Display Noble 
+    public String toString() {
+        return "Noble: " + name + "|" + "Prestige Points: " + prestigePoints + "|" + "Purchase Price: " + purchasePrice;
+    }
+
 }
