@@ -1,4 +1,4 @@
-# Splendor – Web & CLI Board Game
+# Splendor – Board Game reimagined
 
 ## Project Premise
 
