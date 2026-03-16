@@ -1,40 +1,26 @@
 package src.com.splendor.model;
 
-import java.util.*;
+import java.util.ArrayList;
 
-import src.com.splendor.game.GameState;
-
-public class Player{
-    private int playerID;
+/**
+ * Represents a player's game state: tokens, cards, nobles, and prestige.
+ */
+public class Player {
+    private final int playerID;
+    private final boolean isHuman;
     private int prestigePoints = 0;
     private ArrayList<Token> tokens = new ArrayList<Token>();
     private ArrayList<Card> boughtCards = new ArrayList<Card>();
     private ArrayList<Card> reservedCards = new ArrayList<Card>();
     private ArrayList<Noble> nobles = new ArrayList<Noble>();
 
-    public Player(int playerID){
+    public Player(int playerID, boolean isHuman) {
         this.playerID = playerID;
+        this.isHuman = isHuman;
+    }
 
-        // DEBUG
-        // String[] gemTypes = {"black", "blue", "green", "red", "white"};
-        // for (int i = 0; i < 5; i++) {
-        //     for (int j = 0; j < 10; j++) {
-        //         tokens.add(new Token(gemTypes[i]));
-        //     }
-        // }
-
-
-        // its kinda messy
-        // String[] gemTypes = {"black", "blue", "green", "red", "white"};
-        // for (int i = 0; i < 5; i++) {
-        //     for (int j = 0; j < 3; j++) {
-        //         addBoughtCard(new Card(1, gemTypes[i], 0, "00000"));
-        //     }
-        // }
-        // System.out.println("Nobles BEFORE noblesToPlayer: " + Noble.getAvailNobles().size());
-        // noblesToPlayer();
-        // System.out.println("Nobles AFTER noblesToPlayer: " + Noble.getAvailNobles().size());
-
+    public boolean isHuman() {
+        return isHuman;
     }
 
     public int getPlayerID() {
@@ -61,12 +47,7 @@ public class Player{
         return nobles;
     }
 
-
-
-    // added by vg 14/2
-
-
-    public void addToken(Token token){
+    public void addToken(Token token) {
         tokens.add(token);
     }
 
@@ -83,44 +64,12 @@ public class Player{
         this.prestigePoints += card.getPrestigePoints();
     }
 
-    //To-do: Noble must be automatically gained once enough bonus is received 
-    public void addNoble(Noble noble){
+    public void addNoble(Noble noble) {
         this.nobles.add(noble);
         this.prestigePoints += noble.getPrestigePoints();
     }
-    // automatically give noble to player if permanent bonus gems are enough
-     public void noblesToPlayer() {
-        List<Noble> checkNobles = new ArrayList<>(Noble.getAvailNobles());
 
-        for (Noble firstNoble : checkNobles ) {
-            boolean enoughPermanentBonus = true; 
-            for (int i = 0; i < 5; i++) {
-                int permanentBonus = getBoughtCardsGemValueCount(i); 
-                int nobleRequirement = firstNoble.getPurchasePrice().charAt(i) - '0';
-                
-    
-                if (nobleRequirement > permanentBonus) {
-                    enoughPermanentBonus = false; 
-                    break;
-                }
-                
-            }
-
-            if (enoughPermanentBonus) {
-                addNoble(firstNoble); 
-                Noble.removeNoble(firstNoble); 
-                System.out.println("Congratulations! You acquired a Noble: " + firstNoble.getName());
-                break; 
-            }
-
-        }
-    }
-
-
-// Added by Raymond 18/2 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // check token count
-    public int getGemTokenCount(int gemTypeIndex){ // index is the index of the specific gemType in the String array below
+    public int getGemTokenCount(int gemTypeIndex) {
         String[] gemTypes = {"black", "blue", "green", "red", "white"};
         String targetGem = gemTypes[gemTypeIndex];
         int count = 0;
@@ -132,8 +81,7 @@ public class Player{
         return count;
     }
 
-    // check gold token count, kept seperate from getGemTokenCount
-    public int getGoldTokenCount(){
+    public int getGoldTokenCount() {
         int count = 0;
         for (Token token : tokens) {
             if (token.getGemType().equals("gold")) {
@@ -170,5 +118,18 @@ public class Player{
             }
         }
     }
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Removes tokens from player only (no addition to pile).
+     * Used by web GameService which adds to session separately.
+     */
+    public void deductTokens(String gemType, int numberOfTokens) {
+        int removed = 0;
+        for (int i = getTokens().size() - 1; i >= 0 && removed < numberOfTokens; i--) {
+            if (getTokens().get(i).getGemType().equals(gemType)) {
+                getTokens().remove(i);
+                removed++;
+            }
+        }
+    }
 }

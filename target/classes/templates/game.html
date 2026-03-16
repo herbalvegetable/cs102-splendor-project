@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Splendor – Your Turn</title>
+    <link rel="stylesheet" th:href="@{/css/game.css}" href="/css/game.css">
+</head>
+<body>
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+    <th:block th:if="${error}"><div id="flash-error" data-msg th:attr="data-msg=${error}" style="display:none"></div></th:block>
+    <th:block th:if="${success}"><div id="flash-success" data-msg th:attr="data-msg=${success}" style="display:none"></div></th:block>
+
+    <div class="game-container">
+        <nav class="game-nav game-nav-top">
+            <a href="/" class="game-title game-title-link" id="splendor-logo">Splendor</a>
+        </nav>
+
+        <div class="game-board">
+            <!-- Left: Token bank (vertical) -->
+            <section class="token-bank" aria-label="Available tokens">
+                <h2>Token bank</h2>
+                <div class="token-pile token-pile-vertical">
+                    <div class="token-stack">
+                        <span class="token-count token-count-display" th:text="${gameSession.getTokenCount('black') == 0 ? '0 Black left' : gameSession.getTokenCount('black')}">0</span>
+                        <div class="token-pile-physical">
+                            <span th:each="i : ${#numbers.sequence(1, T(java.lang.Math).max(0, gameSession.getTokenCount('black')))}" class="token black token-physical" title="Black"></span>
+                        </div>
+                    </div>
+                    <div class="token-stack">
+                        <span class="token-count token-count-display" th:text="${gameSession.getTokenCount('blue') == 0 ? '0 Blue left' : gameSession.getTokenCount('blue')}">0</span>
+                        <div class="token-pile-physical">
+                            <span th:each="i : ${#numbers.sequence(1, T(java.lang.Math).max(0, gameSession.getTokenCount('blue')))}" class="token blue token-physical" title="Blue"></span>
+                        </div>
+                    </div>
+                    <div class="token-stack">
+                        <span class="token-count token-count-display" th:text="${gameSession.getTokenCount('green')}">0</span>
+                        <div class="token-pile-physical">
+                            <span th:each="i : ${#numbers.sequence(1, T(java.lang.Math).max(0, gameSession.getTokenCount('green')))}" class="token green token-physical" title="Green"></span>
+                        </div>
+                    </div>
+                    <div class="token-stack">
+                        <span class="token-count token-count-display" th:text="${gameSession.getTokenCount('red') == 0 ? '0 Red left' : gameSession.getTokenCount('red')}">0</span>
+                        <div class="token-pile-physical">
+                            <span th:each="i : ${#numbers.sequence(1, T(java.lang.Math).max(0, gameSession.getTokenCount('red')))}" class="token red token-physical" title="Red"></span>
+                        </div>
+                    </div>
+                    <div class="token-stack">
+                        <span class="token-count token-count-display" th:text="${gameSession.getTokenCount('white') == 0 ? '0 White left' : gameSession.getTokenCount('white')}">0</span>
+                        <div class="token-pile-physical">
+                            <span th:each="i : ${#numbers.sequence(1, T(java.lang.Math).max(0, gameSession.getTokenCount('white')))}" class="token white token-physical" title="White"></span>
+                        </div>
+                    </div>
+                    <div class="token-stack">
+                        <span class="token-count token-count-display" th:text="${gameSession.getTokenCount('gold') == 0 ? '0 Gold left' : gameSession.getTokenCount('gold')}">0</span>
+                        <div class="token-pile-physical">
+                            <span th:each="i : ${#numbers.sequence(1, T(java.lang.Math).max(0, gameSession.getTokenCount('gold')))}" class="token gold token-physical" title="Gold (wildcard)"></span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Center: Cards first (fill space), nobles sticky at bottom -->
+            <div class="board-center">
+                <section class="cards-section" aria-label="Development cards">
+                <div class="card-tier">
+                    <h3 class="card-tier-header">Level 1 cards <span class="deck-count" th:text="'(' + ${gameSession.getClosedLevel1().size()} + ' in deck)'">(40 in deck)</span></h3>
+                    <div class="card-row">
+                        <div th:each="card, iter : ${gameSession.getOpenLevel1()}" class="card-slot">
+                            <article class="card card-level1" th:classappend="${card.getGemType().toLowerCase()}">
+                                <div class="card-overlay"></div>
+                                <div class="card-points-badge" th:text="${card.getPrestigePoints()}">0</div>
+                                <div class="card-gem-bonus" th:classappend="${card.getGemType().toLowerCase()}"></div>
+                                <div class="card-costs-stack">
+                                    <span th:if="${card.getPrice('black') > 0}" class="cost-circle black" th:text="${card.getPrice('black')}">0</span>
+                                    <span th:if="${card.getPrice('blue') > 0}" class="cost-circle blue" th:text="${card.getPrice('blue')}">0</span>
+                                    <span th:if="${card.getPrice('green') > 0}" class="cost-circle green" th:text="${card.getPrice('green')}">0</span>
+                                    <span th:if="${card.getPrice('red') > 0}" class="cost-circle red" th:text="${card.getPrice('red')}">0</span>
+                                    <span th:if="${card.getPrice('white') > 0}" class="cost-circle white" th:text="${card.getPrice('white')}">0</span>
+                                </div>
+                            </article>
+                            <div class="card-actions" th:if="${!overTokenLimit}">
+                                <form method="post" th:action="@{/game/reserve-table}"><input type="hidden" name="level" value="1"><input type="hidden" name="index" th:value="${iter.index}"><button type="submit">Reserve</button></form>
+                                <form method="post" th:action="@{/game/buy-table}"><input type="hidden" name="level" value="1"><input type="hidden" name="index" th:value="${iter.index}"><button type="submit">Buy</button></form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-tier">
+                    <h3 class="card-tier-header">Level 2 cards <span class="deck-count" th:text="'(' + ${gameSession.getClosedLevel2().size()} + ' in deck)'">(30 in deck)</span></h3>
+                    <div class="card-row">
+                        <div th:each="card, iter : ${gameSession.getOpenLevel2()}" class="card-slot">
+                            <article class="card card-level2" th:classappend="${card.getGemType().toLowerCase()}">
+                                <div class="card-overlay"></div>
+                                <div class="card-points-badge" th:text="${card.getPrestigePoints()}">0</div>
+                                <div class="card-gem-bonus" th:classappend="${card.getGemType().toLowerCase()}"></div>
+                                <div class="card-costs-stack">
+                                    <span th:if="${card.getPrice('black') > 0}" class="cost-circle black" th:text="${card.getPrice('black')}">0</span>
+                                    <span th:if="${card.getPrice('blue') > 0}" class="cost-circle blue" th:text="${card.getPrice('blue')}">0</span>
+                                    <span th:if="${card.getPrice('green') > 0}" class="cost-circle green" th:text="${card.getPrice('green')}">0</span>
+                                    <span th:if="${card.getPrice('red') > 0}" class="cost-circle red" th:text="${card.getPrice('red')}">0</span>
+                                    <span th:if="${card.getPrice('white') > 0}" class="cost-circle white" th:text="${card.getPrice('white')}">0</span>
+                                </div>
+                            </article>
+                            <div class="card-actions" th:if="${!overTokenLimit}">
+                                <form method="post" th:action="@{/game/reserve-table}"><input type="hidden" name="level" value="2"><input type="hidden" name="index" th:value="${iter.index}"><button type="submit">Reserve</button></form>
+                                <form method="post" th:action="@{/game/buy-table}"><input type="hidden" name="level" value="2"><input type="hidden" name="index" th:value="${iter.index}"><button type="submit">Buy</button></form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-tier">
+                    <h3 class="card-tier-header">Level 3 cards <span class="deck-count" th:text="'(' + ${gameSession.getClosedLevel3().size()} + ' in deck)'">(20 in deck)</span></h3>
+                    <div class="card-row">
+                        <div th:each="card, iter : ${gameSession.getOpenLevel3()}" class="card-slot">
+                            <article class="card card-level3" th:classappend="${card.getGemType().toLowerCase()}">
+                                <div class="card-overlay"></div>
+                                <div class="card-points-badge" th:text="${card.getPrestigePoints()}">0</div>
+                                <div class="card-gem-bonus" th:classappend="${card.getGemType().toLowerCase()}"></div>
+                                <div class="card-costs-stack">
+                                    <span th:if="${card.getPrice('black') > 0}" class="cost-circle black" th:text="${card.getPrice('black')}">0</span>
+                                    <span th:if="${card.getPrice('blue') > 0}" class="cost-circle blue" th:text="${card.getPrice('blue')}">0</span>
+                                    <span th:if="${card.getPrice('green') > 0}" class="cost-circle green" th:text="${card.getPrice('green')}">0</span>
+                                    <span th:if="${card.getPrice('red') > 0}" class="cost-circle red" th:text="${card.getPrice('red')}">0</span>
+                                    <span th:if="${card.getPrice('white') > 0}" class="cost-circle white" th:text="${card.getPrice('white')}">0</span>
+                                </div>
+                            </article>
+                            <div class="card-actions" th:if="${!overTokenLimit}">
+                                <form method="post" th:action="@{/game/reserve-table}"><input type="hidden" name="level" value="3"><input type="hidden" name="index" th:value="${iter.index}"><button type="submit">Reserve</button></form>
+                                <form method="post" th:action="@{/game/buy-table}"><input type="hidden" name="level" value="3"><input type="hidden" name="index" th:value="${iter.index}"><button type="submit">Buy</button></form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+                <section class="nobles-section nobles-sticky" aria-label="Nobles">
+                    <h2>Nobles</h2>
+                    <div class="noble-row">
+                        <div th:each="noble : ${gameSession.getAvailNobles()}" class="noble-tile">
+                            <div class="noble-card" th:style="'background-image: url(/media/nobles/' + ${noble.getImageSlug()} + '.png);'">
+                                <div class="noble-overlay"></div>
+                                <div class="noble-points-badge" th:text="${noble.getPrestigePoints()}">3</div>
+                                <div class="noble-costs-stack">
+                                    <span th:if="${noble.getPrice('black') > 0}" class="cost-circle black" th:text="${noble.getPrice('black')}">0</span>
+                                    <span th:if="${noble.getPrice('blue') > 0}" class="cost-circle blue" th:text="${noble.getPrice('blue')}">0</span>
+                                    <span th:if="${noble.getPrice('green') > 0}" class="cost-circle green" th:text="${noble.getPrice('green')}">0</span>
+                                    <span th:if="${noble.getPrice('red') > 0}" class="cost-circle red" th:text="${noble.getPrice('red')}">0</span>
+                                    <span th:if="${noble.getPrice('white') > 0}" class="cost-circle white" th:text="${noble.getPrice('white')}">0</span>
+                                </div>
+                            </div>
+                            <div class="noble-name" th:text="${noble.getName()}">Noble</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right: Your resources + actions -->
+            <aside class="game-sidebar">
+        <section class="player-area" aria-label="Your resources">
+            <h2>Player <span th:text="${gameSession.getCurrentPlayer().getPlayerID()}">1</span>'s Turn</h2>
+            <p class="points-to-win">Points to win: <strong th:text="${gameSession.getPointsToWin()}">15</strong></p>
+            <div th:if="${overTokenLimit}" class="turn-indicator return-needed">⚠ Return tokens (over limit)</div>
+            <div class="player-stats">
+                <div class="stat">
+                    <span class="label">Prestige</span>
+                    <span class="value" th:text="${gameSession.getCurrentPlayer().getPrestigePoints()}">0</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Tokens</span>
+                    <span class="value" th:text="${gameSession.getCurrentPlayer().getTokens().size()}">0</span><span class="sublabel">/10 max</span>
+                </div>
+                <div class="stat">
+                    <span class="label">Reserved</span>
+                    <span class="value" th:text="${gameSession.getCurrentPlayer().getReservedCards().size()}">0</span><span class="sublabel">/3 max</span>
+                </div>
+            </div>
+            <div class="my-tokens">
+                <span th:each="token : ${gameSession.getCurrentPlayer().getTokens()}" class="token" th:classappend="${token.getGemType().toLowerCase()}" th:attr="title=${'Return this ' + token.getGemType()}" th:text="${token.getGemType().substring(0,1).toUpperCase()}"></span>
+            </div>
+            <div class="my-cards-row">
+                <div class="bought-cards">
+                    <span class="section-label">Bought</span>
+                    <span th:each="card : ${gameSession.getCurrentPlayer().getBoughtCards()}" class="card-chip" th:classappend="${card.getGemType().toLowerCase()}" th:title="${card.getGemType() + ', ' + card.getPrestigePoints() + ' pts'}" th:text="${card.getPrestigePoints()}">0</span>
+                </div>
+                <div class="reserved-cards">
+                    <span class="section-label">Reserved</span>
+                    <span th:each="card, cardIter : ${gameSession.getCurrentPlayer().getReservedCards()}" class="card-chip reserved reserved-card-hover" th:classappend="${card.getGemType().toLowerCase()}"
+                        th:attr="data-pts=${card.getPrestigePoints()},data-gem=${card.getGemType().toLowerCase()},data-black=${card.getPrice('black')},data-blue=${card.getPrice('blue')},data-green=${card.getPrice('green')},data-red=${card.getPrice('red')},data-white=${card.getPrice('white')},data-level=${card.getLevel()}">
+                        <span th:text="${card.getPrestigePoints()}">0</span> pts
+                        <form th:if="${!overTokenLimit}" method="post" th:action="@{/game/buy-reserved}">
+                            <input type="hidden" name="index" th:value="${cardIter.index}">
+                            <button type="submit" title="Buy this card">Buy</button>
+                        </form>
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Actions – one per turn, clear that it ends turn (Heuristic 1, 6) -->
+        <section th:if="${!overTokenLimit}" class="actions-panel" aria-label="Choose one action">
+            <h2>Choose one action — your turn ends when you complete it</h2>
+            <div class="action-cards">
+                <div class="action-card">
+                    <h3>Take 3 different tokens</h3>
+                    <form method="post" action="/game/take3" class="token-picker-form" data-mode="take3">
+                        <label class="sr-only">Pick 3 different colors (click circles)</label>
+                        <div class="token-picker" aria-label="Select 3 token colors">
+                            <button type="button" class="token-pick black" data-color="black" title="Black"></button>
+                            <button type="button" class="token-pick blue" data-color="blue" title="Blue"></button>
+                            <button type="button" class="token-pick green" data-color="green" title="Green"></button>
+                            <button type="button" class="token-pick red" data-color="red" title="Red"></button>
+                            <button type="button" class="token-pick white" data-color="white" title="White"></button>
+                        </div>
+                        <input type="hidden" name="color1" value="black">
+                        <input type="hidden" name="color2" value="blue">
+                        <input type="hidden" name="color3" value="green">
+                        <button type="submit" class="btn-primary">Take 3 & end turn</button>
+                    </form>
+                    <p class="action-hint">Must be 3 different colors, each with ≥1 in bank</p>
+                </div>
+                <div class="action-card">
+                    <h3>Take 2 same tokens</h3>
+                    <form method="post" action="/game/take2" class="token-picker-form" data-mode="take2">
+                        <label class="sr-only">Pick one color with 4+ in bank (click a circle)</label>
+                        <div class="token-picker" aria-label="Select 1 token color">
+                            <button type="button" class="token-pick black" data-color="black" title="Black"></button>
+                            <button type="button" class="token-pick blue" data-color="blue" title="Blue"></button>
+                            <button type="button" class="token-pick green" data-color="green" title="Green"></button>
+                            <button type="button" class="token-pick red" data-color="red" title="Red"></button>
+                            <button type="button" class="token-pick white" data-color="white" title="White"></button>
+                        </div>
+                        <input type="hidden" name="color" value="black">
+                        <button type="submit" class="btn-primary">Take 2 & end turn</button>
+                    </form>
+                    <p class="action-hint">Only if that color has 4+ tokens in bank</p>
+                </div>
+                <div class="action-card">
+                    <h3>Reserve from deck</h3>
+                    <form method="post" action="/game/reserve-deck">
+                        <label class="sr-only">Deck level</label>
+                        <div class="reserve-deck-row">
+                            <select name="level" id="reserve-deck-level" aria-label="Level" th:attr="data-c1=${gameSession.getClosedLevel1().size()},data-c2=${gameSession.getClosedLevel2().size()},data-c3=${gameSession.getClosedLevel3().size()}">
+                                <option value="1">Level 1</option>
+                                <option value="2">Level 2</option>
+                                <option value="3">Level 3</option>
+                            </select>
+                            <span class="deck-count-inline" id="reserve-deck-count">(<span id="reserve-deck-num" th:text="${gameSession.getClosedLevel1().size()}">40</span> left)</span>
+                        </div>
+                        <button type="submit" class="btn-primary">Reserve & end turn</button>
+                    </form>
+                    <p class="action-hint">Draw blindly; get 1 gold if available. Max 3 reserved.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Return tokens when over limit -->
+        <section th:if="${overTokenLimit}" class="return-panel" aria-label="Return excess tokens">
+            <h2>Return tokens</h2>
+            <p>You have <strong th:text="${gameSession.getCurrentPlayer().getTokens().size()}">0</strong> tokens. Limit is 10. Select <strong th:text="${gameSession.getCurrentPlayer().getTokens().size() - gameSession.getMaxTokensPerPlayer()}">0</strong> to return:</p>
+            <form method="post" action="/game/return-tokens">
+                <div class="return-token-list">
+                    <label th:each="token, tokIter : ${gameSession.getCurrentPlayer().getTokens()}" class="return-token-option">
+                        <input type="checkbox" name="tokens" th:value="${token.getGemType()}" th:id="${'ret_' + tokIter.index}">
+                        <span class="token" th:classappend="${token.getGemType().toLowerCase()}"></span>
+                    </label>
+                </div>
+                <button type="submit" class="btn-primary">Return selected & end turn</button>
+            </form>
+        </section>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Help button (fixed bottom right) -->
+    <button type="button" class="help-btn" id="help-btn" aria-label="View rules">?</button>
+
+    <!-- Rules modal -->
+    <div class="modal-overlay" id="rules-modal" aria-hidden="true">
+        <div class="modal-content" role="dialog" aria-labelledby="modal-title" aria-modal="true">
+            <button type="button" class="modal-close" id="modal-close" aria-label="Close">×</button>
+            <h2 id="modal-title">How to Play Splendor</h2>
+            <div class="modal-rules">
+                <p><strong>Goal:</strong> Be the first to reach <strong th:text="${gameSession.getPointsToWin()}">15</strong> prestige points.</p>
+                <p><strong>On your turn</strong> you must do exactly one action:</p>
+                <ul>
+                    <li><strong>Take 3 different tokens</strong> — one of each color (each must have ≥1 in the bank)</li>
+                    <li><strong>Take 2 same tokens</strong> — only if that color has 4+ in the bank</li>
+                    <li><strong>Reserve a card</strong> — from the table or from a deck (face-down); you get 1 gold if available. Max 3 reserved.</li>
+                    <li><strong>Buy a card</strong> — from the table or your reserved cards. Pay the token cost; cards give permanent gem bonuses for future buys.</li>
+                </ul>
+                <p><strong>Nobles</strong> visit you when you have enough gem bonuses to meet their requirements. Each noble is worth 3 prestige points. Only one noble per turn.</p>
+                <p>You cannot hold more than <strong>10 tokens</strong> at the end of your turn. When the first player reaches the target, the round finishes so everyone has equal turns. Highest prestige wins.</p>
+            </div>
+            <div class="modal-video">
+                <iframe src="https://www.youtube.com/embed/rue8-jvbc9I" title="Splendor rules video" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            var logo = document.getElementById('splendor-logo');
+            if (logo) {
+                logo.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (confirm('Are you sure you want to exit the game and return to the main menu?')) {
+                        window.location.href = '/';
+                    }
+                });
+            }
+        })();
+        (function() {
+            var container = document.getElementById('toast-container');
+            function showToast(type, msg) {
+                if (!container || !msg) return;
+                var toast = document.createElement('div');
+                toast.className = 'toast toast-' + type;
+                toast.setAttribute('role', 'alert');
+                toast.innerHTML = '<span class="toast-msg">' + (type === 'error' ? '<strong>Action failed:</strong> ' : '') + escapeHtml(msg) + '</span><button type="button" class="toast-dismiss" aria-label="Dismiss">×</button>';
+                container.appendChild(toast);
+                requestAnimationFrame(function() { toast.classList.add('toast-visible'); });
+                var t = setTimeout(function() { dismiss(toast); }, 15000);
+                toast._timer = t;
+                toast.querySelector('.toast-dismiss').onclick = function() { clearTimeout(t); dismiss(toast); };
+            }
+            function dismiss(toast) {
+                toast.classList.remove('toast-visible');
+                setTimeout(function() { toast.remove(); }, 300);
+            }
+            function escapeHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+            var err = document.getElementById('flash-error');
+            var suc = document.getElementById('flash-success');
+            if (err && err.getAttribute('data-msg')) showToast('error', err.getAttribute('data-msg'));
+            if (suc && suc.getAttribute('data-msg')) showToast('success', suc.getAttribute('data-msg'));
+        })();
+        (function() {
+            var btn = document.getElementById('help-btn');
+            var modal = document.getElementById('rules-modal');
+            var close = document.getElementById('modal-close');
+            if (btn && modal && close) {
+                btn.addEventListener('click', function() { modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); });
+                close.addEventListener('click', function() { modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); });
+                modal.addEventListener('click', function(e) { if (e.target === modal) { modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); } });
+            }
+        })();
+        (function() {
+            var forms = document.querySelectorAll('.token-picker-form');
+            forms.forEach(function(form) {
+                var mode = form.getAttribute('data-mode');
+                var picks = form.querySelectorAll('.token-pick');
+                if (mode === 'take3') {
+                    var hidden1 = form.querySelector('input[name="color1"]');
+                    var hidden2 = form.querySelector('input[name="color2"]');
+                    var hidden3 = form.querySelector('input[name="color3"]');
+                    var selected = ['black','blue','green'];
+                    function updateTake3() {
+                        hidden1.value = selected[0] || '';
+                        hidden2.value = selected[1] || '';
+                        hidden3.value = selected[2] || '';
+                    }
+                    form.addEventListener('submit', function(e) {
+                        if (selected.length !== 3) { e.preventDefault(); return false; }
+                    });
+                    picks.forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            var c = btn.getAttribute('data-color');
+                            var idx = selected.indexOf(c);
+                            if (idx >= 0) { selected.splice(idx, 1); btn.classList.remove('selected'); }
+                            else if (selected.length < 3) { selected.push(c); btn.classList.add('selected'); }
+                            updateTake3();
+                        });
+                    });
+                    form.querySelectorAll('.token-pick.black,.token-pick.blue,.token-pick.green').forEach(function(b){ b.classList.add('selected'); });
+                    updateTake3();
+                } else if (mode === 'take2') {
+                    var hidden = form.querySelector('input[name="color"]');
+                    picks.forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            picks.forEach(function(b){ b.classList.remove('selected'); });
+                            btn.classList.add('selected');
+                            hidden.value = btn.getAttribute('data-color');
+                        });
+                    });
+                    form.querySelector('.token-pick.black').classList.add('selected');
+                }
+            });
+        })();
+        (function() {
+            var preview = document.createElement('div');
+            preview.className = 'reserved-card-preview';
+            preview.id = 'reserved-card-preview';
+            document.body.appendChild(preview);
+            document.querySelectorAll('.reserved-card-hover').forEach(function(el) {
+                el.addEventListener('mouseenter', function(e) {
+                    var pts = el.getAttribute('data-pts');
+                    var gem = el.getAttribute('data-gem');
+                    var bl = el.getAttribute('data-black') || 0;
+                    var bu = el.getAttribute('data-blue') || 0;
+                    var gr = el.getAttribute('data-green') || 0;
+                    var rd = el.getAttribute('data-red') || 0;
+                    var wh = el.getAttribute('data-white') || 0;
+                    var costs = [];
+                    if (bl > 0) costs.push('<span class="cost-circle black">' + bl + '</span>');
+                    if (bu > 0) costs.push('<span class="cost-circle blue">' + bu + '</span>');
+                    if (gr > 0) costs.push('<span class="cost-circle green">' + gr + '</span>');
+                    if (rd > 0) costs.push('<span class="cost-circle red">' + rd + '</span>');
+                    if (wh > 0) costs.push('<span class="cost-circle white">' + wh + '</span>');
+                    preview.innerHTML = '<div class="card card-preview ' + gem + '"><div class="card-overlay"></div><div class="card-points-badge">' + pts + '</div><div class="card-gem-bonus ' + gem + '"></div><div class="card-costs-stack">' + costs.join('') + '</div></div>';
+                    preview.style.left = (e.clientX + 15) + 'px';
+                    preview.style.top = (e.clientY + 15) + 'px';
+                    preview.classList.add('visible');
+                });
+                el.addEventListener('mousemove', function(e) {
+                    preview.style.left = (e.clientX + 15) + 'px';
+                    preview.style.top = (e.clientY + 15) + 'px';
+                });
+                el.addEventListener('mouseleave', function() {
+                    preview.classList.remove('visible');
+                });
+            });
+        })();
+        (function() {
+            var sel = document.getElementById('reserve-deck-level');
+            var numSpan = document.getElementById('reserve-deck-num');
+            if (sel && numSpan) {
+                function updateReserveCount() {
+                    var level = sel.value;
+                    var count = sel.getAttribute('data-c' + level);
+                    if (count != null) numSpan.textContent = count;
+                }
+                sel.addEventListener('change', updateReserveCount);
+                updateReserveCount();
+            }
+        })();
+    </script>
+</body>
+</html>

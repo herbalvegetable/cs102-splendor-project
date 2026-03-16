@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Splendor – CPU Turn</title>
+    <link rel="stylesheet" th:href="@{/css/game.css}" href="/css/game.css">
+</head>
+<body>
+    <div class="game-container cpu-turn-view">
+        <header class="game-header">
+            <h1>Splendor</h1>
+            <div class="turn-indicator cpu-turn">
+                CPU Player <span th:text="${cpuPlayerId}">2</span>'s turn
+            </div>
+        </header>
+
+        <section class="cpu-turn-log" aria-live="polite">
+            <h2>Play-by-play</h2>
+            <div id="log-container" class="log-entries"></div>
+            <div id="next-button-container" class="next-button-container" style="display: none;">
+                <a th:href="@{/game}" class="btn-primary btn-next">Move to next player's turn</a>
+            </div>
+        </section>
+
+        <section class="board-summary">
+            <h2>Current board state</h2>
+            <div class="token-pile">
+                <div class="token-stack"><span class="token black"></span><span class="token-count" th:text="${gameSession.getTokenCount('black')}">0</span></div>
+                <div class="token-stack"><span class="token blue"></span><span class="token-count" th:text="${gameSession.getTokenCount('blue')}">0</span></div>
+                <div class="token-stack"><span class="token green"></span><span class="token-count" th:text="${gameSession.getTokenCount('green')}">0</span></div>
+                <div class="token-stack"><span class="token red"></span><span class="token-count" th:text="${gameSession.getTokenCount('red')}">0</span></div>
+                <div class="token-stack"><span class="token white"></span><span class="token-count" th:text="${gameSession.getTokenCount('white')}">0</span></div>
+                <div class="token-stack"><span class="token gold"></span><span class="token-count" th:text="${gameSession.getTokenCount('gold')}">0</span></div>
+            </div>
+        </section>
+    </div>
+
+    <div id="log-data" style="display:none" th:if="${cpuTurnLog != null}">
+        <span th:each="entry : ${cpuTurnLog}" class="log-entry-src" th:text="${entry}"></span>
+    </div>
+    <script>
+        (function() {
+            var src = document.querySelectorAll('#log-data .log-entry-src');
+            var logEntries = Array.prototype.map.call(src, function(s) { return s.textContent; });
+            var container = document.getElementById('log-container');
+            var nextContainer = document.getElementById('next-button-container');
+            var delayMs = 1000;
+
+            if (!logEntries.length) {
+                container.innerHTML = '<p class="log-empty">No actions this turn.</p>';
+                nextContainer.style.display = 'block';
+                return;
+            }
+
+            var index = 0;
+            function showNext() {
+                if (index < logEntries.length) {
+                    var entry = document.createElement('div');
+                    entry.className = 'log-entry';
+                    entry.textContent = logEntries[index];
+                    container.appendChild(entry);
+                    index++;
+                    setTimeout(showNext, delayMs);
+                } else {
+                    nextContainer.style.display = 'block';
+                }
+            }
+            showNext();
+        })();
+    </script>
+</body>
+</html>

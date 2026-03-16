@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Splendor – New Game</title>
+    <link rel="stylesheet" th:href="@{/css/game.css}" href="/css/game.css">
+</head>
+<body class="index-page">
+    <div class="index-bg-wrapper">
+        <div class="index-bg index-bg-1" data-bg="1"></div>
+        <div class="index-bg index-bg-2" data-bg="2"></div>
+        <div class="index-bg index-bg-3" data-bg="3"></div>
+        <div class="index-bg index-bg-4" data-bg="4"></div>
+    </div>
+    <div class="index-content">
+        <h1 class="index-logo">Splendor</h1>
+        <p class="subtitle">Start a new game</p>
+
+        <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+        <form action="/new-game" method="post" class="setup-form index-form">
+            <div class="form-group">
+                <label for="humanCount">Human players</label>
+                <select id="humanCount" name="humanCount">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="cpuCount">CPU players</label>
+                <select id="cpuCount" name="cpuCount">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                </select>
+            </div>
+            <p class="hint">Total: 2–4 players</p>
+            <button type="submit">Start Game</button>
+        </form>
+    </div>
+    <script>
+        (function() {
+            var interval = 5000;
+            var current = 0;
+            var slides = document.querySelectorAll('.index-bg');
+            if (slides.length < 2) return;
+            function next() {
+                slides[current].classList.remove('active');
+                current = (current + 1) % slides.length;
+                slides[current].classList.add('active');
+            }
+            slides[0].classList.add('active');
+            setInterval(next, interval);
+        })();
+    </script>
+</body>
+</html>

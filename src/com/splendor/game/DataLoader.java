@@ -24,7 +24,7 @@ public class DataLoader {
         }
     }
 
-    public static String getProperty(String key){
+    public String getProperty(String key) {
         return properties.getProperty(key, null);
     }
 
