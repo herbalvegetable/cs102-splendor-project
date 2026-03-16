@@ -39,7 +39,7 @@ public class Card {
         closedLists.add(Card.closedLevel3);
 
         DataLoader dloader = new DataLoader();
-        String cardsContent = dloader.readResourceFile("/cards.csv"); //classpath includes resources folder
+        String cardsContent = dloader.readResourceFile("/cards.csv"); // classpath includes resources folder
         // System.out.println(cardsContent);
 
         String[] lines = cardsContent.split("\n");
@@ -65,6 +65,7 @@ public class Card {
             // System.out.println("" + (level - 1));
             closedLists.get(level - 1).add(new Card(level, color, prestigePoints, purchasePriceString));
         }
+
     }
 
     // transfer cards from closed deck to open deck UNTIL EITHER:
@@ -132,10 +133,23 @@ public class Card {
     }
 
     public String getPurchasePrice() {
-        return purchasePrice;
+        return purchasePrice; 
+    }
+
+    public int getPrice(String tokenColor) {
+        switch(tokenColor.toLowerCase()) {
+            case "black": return purchasePrice.charAt(0) - '0';
+            case "blue": return purchasePrice.charAt(1) - '0';
+            case "green": return purchasePrice.charAt(2) - '0';
+            case "red": return purchasePrice.charAt(3) - '0';
+            case "white": return purchasePrice.charAt(4) - '0';
+            default:return 0; 
+        }
     }
 
     public String toString() {
-        return "Level: " + level + " | Gem Type: " + gemType + " | Points: " + prestigePoints + " | Price: " + purchasePrice;
+        return "Level: " + level + " | Gem Type: " + gemType + " | Points: " + prestigePoints +
+                "\n      Price -> Black: " + getPrice("black") + " | Blue: " + getPrice("blue") + " | Green: "
+                + getPrice("green") + " | Red: " + getPrice("red") + " | White: " + getPrice("white");
     }
 }

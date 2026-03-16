@@ -84,11 +84,34 @@ public class Noble {
         return prestigePoints;
     }
 
+    // remove nobles from the board
+    public static void removeNoble(Noble noble) {
+        availNobles.remove(noble); 
+    }
 
+    public int getPrice(String tokenColor) {
+        switch(tokenColor.toLowerCase()) {
+            case "black": return purchasePrice.charAt(0) - 
+            '0';
+            case "blue": return purchasePrice.charAt(1) - 
+            '0';
+            case "green": return purchasePrice.charAt(2) - 
+            '0';
+            case "red": return purchasePrice.charAt(3)  - 
+            '0';
+            case "white": return purchasePrice.charAt(4) - 
+            '0';
+            default:return 0; 
+        }
+    }
+    
 
     //to Display Noble 
     public String toString() {
-        return "Noble: " + name + "|" + "Prestige Points: " + prestigePoints + "|" + "Purchase Price: " + purchasePrice;
+    
+        return "Noble: " + name + " | " + "Prestige Points: " + prestigePoints + 
+        "\n      Price -> Black: " + getPrice("black") + " | Blue: " + getPrice("blue") + " | Green: "
+                + getPrice("green") + " | Red: " + getPrice("red") + " | White: " + getPrice("white");
     }
 
 }

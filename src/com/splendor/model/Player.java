@@ -2,6 +2,8 @@ package src.com.splendor.model;
 
 import java.util.*;
 
+import src.com.splendor.game.GameState;
+
 public class Player{
     private int playerID;
     private int prestigePoints = 0;
@@ -13,13 +15,26 @@ public class Player{
     public Player(int playerID){
         this.playerID = playerID;
 
-        //DEBUG
+        // DEBUG
         // String[] gemTypes = {"black", "blue", "green", "red", "white"};
         // for (int i = 0; i < 5; i++) {
         //     for (int j = 0; j < 10; j++) {
         //         tokens.add(new Token(gemTypes[i]));
         //     }
         // }
+
+
+        // its kinda messy
+        // String[] gemTypes = {"black", "blue", "green", "red", "white"};
+        // for (int i = 0; i < 5; i++) {
+        //     for (int j = 0; j < 3; j++) {
+        //         addBoughtCard(new Card(1, gemTypes[i], 0, "00000"));
+        //     }
+        // }
+        // System.out.println("Nobles BEFORE noblesToPlayer: " + Noble.getAvailNobles().size());
+        // noblesToPlayer();
+        // System.out.println("Nobles AFTER noblesToPlayer: " + Noble.getAvailNobles().size());
+
     }
 
     public int getPlayerID() {
@@ -73,6 +88,34 @@ public class Player{
         this.nobles.add(noble);
         this.prestigePoints += noble.getPrestigePoints();
     }
+    // automatically give noble to player if permanent bonus gems are enough
+     public void noblesToPlayer() {
+        List<Noble> checkNobles = new ArrayList<>(Noble.getAvailNobles());
+
+        for (Noble firstNoble : checkNobles ) {
+            boolean enoughPermanentBonus = true; 
+            for (int i = 0; i < 5; i++) {
+                int permanentBonus = getBoughtCardsGemValueCount(i); 
+                int nobleRequirement = firstNoble.getPurchasePrice().charAt(i) - '0';
+                
+    
+                if (nobleRequirement > permanentBonus) {
+                    enoughPermanentBonus = false; 
+                    break;
+                }
+                
+            }
+
+            if (enoughPermanentBonus) {
+                addNoble(firstNoble); 
+                Noble.removeNoble(firstNoble); 
+                System.out.println("Congratulations! You acquired a Noble: " + firstNoble.getName());
+                break; 
+            }
+
+        }
+    }
+
 
 // Added by Raymond 18/2 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
