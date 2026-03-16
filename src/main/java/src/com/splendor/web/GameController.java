@@ -40,6 +40,10 @@ public class GameController {
         if (current.isHuman()) {
             model.addAttribute("gameSession", gs);
             model.addAttribute("overTokenLimit", current.getTokens().size() > gs.getMaxTokensPerPlayer());
+            if (Boolean.TRUE.equals(session.getAttribute("showTour"))) {
+                model.addAttribute("showTour", true);
+                session.removeAttribute("showTour");
+            }
             return "game";
         }
         List<String> log = executeOneCPUTurn(gs);

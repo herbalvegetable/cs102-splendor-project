@@ -639,11 +639,109 @@ body:has(.game-board) .game-nav.game-nav-top {
 
 /* Heuristic 6: Your resources always visible */
 .player-area {
+    position: relative;
     flex-shrink: 0;
     background: var(--bg-elevated);
     padding: var(--space);
     border-radius: var(--radius);
     margin-bottom: var(--space);
+}
+
+.eye-btn {
+    position: absolute;
+    top: var(--space);
+    right: var(--space);
+    width: 2rem;
+    height: 2rem;
+    padding: 0.25rem;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.eye-btn:hover {
+    background: rgba(212, 168, 75, 0.25);
+    color: var(--accent-gold);
+}
+
+.other-players-dropdown {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-elevated);
+    border: 1px solid rgba(212, 168, 75, 0.35);
+    border-radius: var(--radius);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+    z-index: 1500;
+    max-height: 70vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212, 168, 75, 0.4) var(--bg-elevated);
+    transform: translateY(-100%);
+    visibility: hidden;
+    transition: transform 0.2s, visibility 0.2s;
+}
+
+.other-players-dropdown.visible {
+    transform: translateY(0);
+    visibility: visible;
+}
+
+.other-players-close {
+    position: absolute;
+    top: var(--space);
+    right: var(--space);
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+}
+
+.other-players-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.other-players-dropdown::-webkit-scrollbar {
+    width: 10px;
+}
+
+.other-players-dropdown::-webkit-scrollbar-track {
+    background: var(--bg-elevated);
+    border-radius: 5px;
+}
+
+.other-players-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(212, 168, 75, 0.4);
+    border-radius: 5px;
+}
+
+.other-players-dropdown::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 168, 75, 0.6);
+}
+
+.other-player-view {
+    padding: var(--space);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.other-player-view:first-child {
+    padding-top: 3rem;
+}
+
+.other-player-view:last-child {
+    border-bottom: none;
 }
 
 .player-area .points-to-win {
@@ -1014,6 +1112,7 @@ body.index-page {
     position: fixed;
     inset: 0;
     z-index: 0;
+    overflow: hidden;
 }
 
 @keyframes index-bg-pan {
@@ -1021,22 +1120,24 @@ body.index-page {
     to { background-position: 100% 50%; }
 }
 
+/* All slides run the same pan animation from page load – they stay in sync.
+   We only toggle opacity; no position reset when switching images. */
 .index-bg {
     position: absolute;
     inset: 0;
     background-color: var(--bg-dark);
-    background-size: cover;
+    background-size: 150%;
     background-position: 0% 50%;
     background-repeat: no-repeat;
     filter: blur(12px) brightness(0.4);
-    transform: scale(1.05);
+    transform: scale(1.2);
     opacity: 0;
+    animation: index-bg-pan 20s linear infinite;
     transition: opacity 2s ease-in-out;
 }
 
 .index-bg.active {
     opacity: 1;
-    animation: index-bg-pan 5s linear forwards;
 }
 
 .index-bg-1 { background-image: url(../media/renaissance-bg.jpg); }
@@ -1324,4 +1425,119 @@ body.index-page {
     width: 100%;
     height: 100%;
     border-radius: var(--radius-sm);
+}
+
+/* Guided tour */
+.tour-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.tour-overlay.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.tour-spotlight {
+    position: fixed;
+    display: none;
+    border-radius: var(--radius);
+    background: transparent;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.65);
+    border: 3px solid var(--accent-gold);
+    pointer-events: none;
+    transition: top 0.2s, left 0.2s, width 0.2s, height 0.2s;
+}
+
+.tour-tooltip {
+    position: fixed;
+    max-width: 380px;
+    background: var(--bg-elevated);
+    border: 1px solid rgba(212, 168, 75, 0.4);
+    border-radius: var(--radius);
+    padding: var(--space);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    z-index: 2001;
+    pointer-events: auto;
+}
+
+.tour-tooltip-title {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    color: var(--accent-gold);
+}
+
+.tour-tooltip-body {
+    margin: 0 0 1rem 0;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    line-height: 1.45;
+}
+
+.tour-tooltip-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.tour-step-indicator {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.tour-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.tour-btn {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--text-primary);
+}
+
+.tour-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.tour-btn.tour-primary {
+    background: var(--accent-gold);
+    color: #1a1a2e;
+}
+
+.tour-btn.tour-primary:hover {
+    background: var(--accent-gold-hover);
+}
+
+.tour-btn.tour-skip {
+    margin-right: auto;
+}
+
+.tour-again-btn {
+    display: block;
+    width: 100%;
+    padding: 0.6rem var(--space);
+    margin-bottom: var(--space);
+    font-size: 0.95rem;
+    background: rgba(212, 168, 75, 0.2);
+    border: 1px solid rgba(212, 168, 75, 0.4);
+    border-radius: var(--radius-sm);
+    color: var(--accent-gold);
+    cursor: pointer;
+}
+
+.tour-again-btn:hover {
+    background: rgba(212, 168, 75, 0.3);
 }

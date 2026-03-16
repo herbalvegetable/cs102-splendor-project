@@ -30,6 +30,7 @@ public class HomeController {
         }
         GameSession gameSession = gameService.newGame(humanCount, cpuCount);
         session.setAttribute("gameSession", gameSession);
+        session.setAttribute("showTour", true);
         return "redirect:/game";
     }
 }
