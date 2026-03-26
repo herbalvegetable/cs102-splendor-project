@@ -212,6 +212,7 @@ public class GameService {
         for (int i = 0; i < 5; i++) {
             int cost = card.getPurchasePrice().charAt(i) - '0';
             int bonus = player.getBoughtCardsGemValueCount(i);
+            System.out.println("Cost: " + cost + ", Bonus: " + bonus + ", GemType: " + GEM_COLORS[i]);
             int needed = Math.max(0, cost - bonus);
             int has = player.getGemTokenCount(i);
             if (has < needed) {

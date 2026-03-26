@@ -1,11 +1,15 @@
 package src.com.splendor.model;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Represents a player's game state: tokens, cards, nobles, and prestige.
  */
 public class Player {
+
+    private static final String[] TOKEN_ORDER = {"black", "blue", "green", "red", "white", "gold"};
     private final int playerID;
     private final boolean isHuman;
     private int prestigePoints = 0;
@@ -33,6 +37,18 @@ public class Player {
 
     public ArrayList<Token> getTokens() {
         return tokens;
+    }
+
+    /** Returns tokens sorted by color: black, blue, green, red, white, gold. */
+    public List<Token> getTokensSorted() {
+        ArrayList<Token> sorted = new ArrayList<>(tokens);
+        sorted.sort(Comparator.comparingInt(t -> {
+            for (int i = 0; i < TOKEN_ORDER.length; i++) {
+                if (TOKEN_ORDER[i].equals(t.getGemType().toLowerCase())) return i;
+            }
+            return TOKEN_ORDER.length;
+        }));
+        return sorted;
     }
 
     public ArrayList<Card> getBoughtCards() {

@@ -182,16 +182,20 @@
                         </div>
                     </div>
                     <div class="my-tokens">
-                        <span th:each="token : ${player.getTokens()}" class="token" th:classappend="${token.getGemType().toLowerCase()}" th:attr="title=${token.getGemType()}" th:text="${token.getGemType().substring(0,1).toUpperCase()}"></span>
+                        <span th:each="token : ${player.getTokensSorted()}" class="token" th:classappend="${token.getGemType().toLowerCase()}" th:attr="title=${token.getGemType()}" th:text="${token.getGemType().substring(0,1).toUpperCase()}"></span>
                     </div>
                     <div class="my-cards-row">
                         <div class="bought-cards">
                             <span class="section-label">Bought</span>
-                            <span th:each="card : ${player.getBoughtCards()}" class="card-chip" th:classappend="${card.getGemType().toLowerCase()}" th:title="${card.getGemType() + ', ' + card.getPrestigePoints() + ' pts'}" th:text="${card.getPrestigePoints()}">0</span>
+                            <span th:each="card : ${player.getBoughtCards()}" class="card-chip reserved-card-hover" th:classappend="${card.getGemType().toLowerCase()}"
+                                th:attr="data-pts=${card.getPrestigePoints()},data-gem=${card.getGemType().toLowerCase()},data-black=${card.getPrice('black')},data-blue=${card.getPrice('blue')},data-green=${card.getPrice('green')},data-red=${card.getPrice('red')},data-white=${card.getPrice('white')},data-level=${card.getLevel()}"
+                                th:title="${card.getGemType() + ', ' + card.getPrestigePoints() + ' pts'}" th:text="${card.getPrestigePoints()}">0</span>
                         </div>
                         <div class="reserved-cards">
                             <span class="section-label">Reserved</span>
-                            <span th:each="card : ${player.getReservedCards()}" class="card-chip reserved" th:classappend="${card.getGemType().toLowerCase()}" th:title="${card.getGemType() + ', ' + card.getPrestigePoints() + ' pts'}"><span th:text="${card.getPrestigePoints()}">0</span> pts</span>
+                            <span th:each="card : ${player.getReservedCards()}" class="card-chip reserved reserved-card-hover" th:classappend="${card.getGemType().toLowerCase()}"
+                                th:attr="data-pts=${card.getPrestigePoints()},data-gem=${card.getGemType().toLowerCase()},data-black=${card.getPrice('black')},data-blue=${card.getPrice('blue')},data-green=${card.getPrice('green')},data-red=${card.getPrice('red')},data-white=${card.getPrice('white')},data-level=${card.getLevel()}"
+                                th:title="${card.getGemType() + ', ' + card.getPrestigePoints() + ' pts'}"><span th:text="${card.getPrestigePoints()}">0</span> pts</span>
                         </div>
                     </div>
                 </div>
@@ -215,7 +219,7 @@
                 </div>
             </div>
             <div class="my-tokens">
-                <span th:each="token : ${gameSession.getCurrentPlayer().getTokens()}" class="token" th:classappend="${token.getGemType().toLowerCase()}" th:attr="title=${'Return this ' + token.getGemType()}" th:text="${token.getGemType().substring(0,1).toUpperCase()}"></span>
+                <span th:each="token : ${gameSession.getCurrentPlayer().getTokensSorted()}" class="token" th:classappend="${token.getGemType().toLowerCase()}" th:attr="title=${'Return this ' + token.getGemType()}" th:text="${token.getGemType().substring(0,1).toUpperCase()}"></span>
             </div>
             <div class="my-cards-row">
                 <div class="bought-cards">
@@ -299,7 +303,7 @@
             <p>You have <strong th:text="${gameSession.getCurrentPlayer().getTokens().size()}">0</strong> tokens. Limit is 10. Select <strong th:text="${gameSession.getCurrentPlayer().getTokens().size() - gameSession.getMaxTokensPerPlayer()}">0</strong> to return:</p>
             <form method="post" action="/game/return-tokens">
                 <div class="return-token-list">
-                    <label th:each="token, tokIter : ${gameSession.getCurrentPlayer().getTokens()}" class="return-token-option">
+                    <label th:each="token, tokIter : ${gameSession.getCurrentPlayer().getTokensSorted()}" class="return-token-option">
                         <input type="checkbox" name="tokens" th:value="${token.getGemType()}" th:id="${'ret_' + tokIter.index}">
                         <span class="token" th:classappend="${token.getGemType().toLowerCase()}"></span>
                     </label>
@@ -450,10 +454,32 @@
             preview.className = 'reserved-card-preview';
             preview.id = 'reserved-card-preview';
             document.body.appendChild(preview);
+            function positionReservedPreview(e) {
+                var pad = 15;
+                var midY = window.innerHeight / 2;
+                var ph = preview.offsetHeight || 220;
+                var pw = preview.offsetWidth || 160;
+                var left = e.clientX + pad;
+                var top;
+                if (e.clientY > midY) {
+                    top = e.clientY - ph - pad;
+                } else {
+                    top = e.clientY + pad;
+                }
+                if (left + pw > window.innerWidth - pad) left = window.innerWidth - pw - pad;
+                if (left < pad) left = pad;
+                if (top + ph > window.innerHeight - pad) top = window.innerHeight - ph - pad;
+                if (top < pad) top = pad;
+                preview.style.left = left + 'px';
+                preview.style.top = top + 'px';
+            }
             document.querySelectorAll('.reserved-card-hover').forEach(function(el) {
                 el.addEventListener('mouseenter', function(e) {
                     var pts = el.getAttribute('data-pts');
                     var gem = el.getAttribute('data-gem');
+                    var level = el.getAttribute('data-level') || '1';
+                    var tierUrls = { '1': '/media/cards/level1/level1_raw_materials.png', '2': '/media/cards/level2/level2_transport_refining.png', '3': '/media/cards/level3/level3_luxury_jewelry.png' };
+                    var bgUrl = tierUrls[level] || tierUrls['1'];
                     var bl = el.getAttribute('data-black') || 0;
                     var bu = el.getAttribute('data-blue') || 0;
                     var gr = el.getAttribute('data-green') || 0;
@@ -465,14 +491,17 @@
                     if (gr > 0) costs.push('<span class="cost-circle green">' + gr + '</span>');
                     if (rd > 0) costs.push('<span class="cost-circle red">' + rd + '</span>');
                     if (wh > 0) costs.push('<span class="cost-circle white">' + wh + '</span>');
-                    preview.innerHTML = '<div class="card card-preview ' + gem + '"><div class="card-overlay"></div><div class="card-points-badge">' + pts + '</div><div class="card-gem-bonus ' + gem + '"></div><div class="card-costs-stack">' + costs.join('') + '</div></div>';
-                    preview.style.left = (e.clientX + 15) + 'px';
-                    preview.style.top = (e.clientY + 15) + 'px';
+                    var cardEl = document.createElement('div');
+                    cardEl.className = 'card card-preview ' + gem;
+                    cardEl.style.backgroundImage = 'url(' + bgUrl + ')';
+                    cardEl.innerHTML = '<div class="card-overlay"></div><div class="card-points-badge">' + pts + '</div><div class="card-gem-bonus ' + gem + '"></div><div class="card-costs-stack">' + costs.join('') + '</div>';
+                    preview.innerHTML = '';
+                    preview.appendChild(cardEl);
                     preview.classList.add('visible');
+                    requestAnimationFrame(function() { positionReservedPreview(e); });
                 });
                 el.addEventListener('mousemove', function(e) {
-                    preview.style.left = (e.clientX + 15) + 'px';
-                    preview.style.top = (e.clientY + 15) + 'px';
+                    positionReservedPreview(e);
                 });
                 el.addEventListener('mouseleave', function() {
                     preview.classList.remove('visible');

@@ -882,9 +882,14 @@ body:has(.game-board) .game-nav.game-nav-top {
 .reserved-card-preview .card-preview {
     width: 150px;
     height: 210px;
-    background: var(--bg-card);
+    background-size: cover;
+    background-position: center;
     box-shadow: 0 8px 32px rgba(0,0,0,0.6);
 }
+
+.reserved-card-preview .card-preview.card-level1 { background-image: url(/media/cards/level1/level1_raw_materials.png); }
+.reserved-card-preview .card-preview.card-level2 { background-image: url(/media/cards/level2/level2_transport_refining.png); }
+.reserved-card-preview .card-preview.card-level3 { background-image: url(/media/cards/level3/level3_luxury_jewelry.png); }
 
 /* Heuristic 1 & 6: Actions – clear that completing ends turn */
 .actions-panel {
@@ -1038,6 +1043,29 @@ body:has(.game-board) .game-nav.game-nav-top {
     padding: var(--space);
     border-radius: var(--radius);
     border: 1px solid rgba(199, 92, 92, 0.4);
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212, 168, 75, 0.4) var(--bg-dark);
+}
+
+.return-panel::-webkit-scrollbar {
+    width: 8px;
+}
+
+.return-panel::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+    border-radius: 4px;
+}
+
+.return-panel::-webkit-scrollbar-thumb {
+    background: rgba(212, 168, 75, 0.4);
+    border-radius: 4px;
+}
+
+.return-panel::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 168, 75, 0.6);
 }
 
 .return-panel p {
@@ -1054,17 +1082,31 @@ body:has(.game-board) .game-nav.game-nav-top {
 .return-token-option {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
     cursor: pointer;
 }
 
 .return-token-option input {
-    margin: 0;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
 }
 
 .return-token-option .token {
     width: 32px;
     height: 32px;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.return-token-option input:checked ~ .token {
+    border-color: #c0392b;
+    box-shadow: 0 0 0 2px #c0392b;
 }
 
 /* Navigation */
