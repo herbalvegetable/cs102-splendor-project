@@ -1,0 +1,218 @@
+%% Splendor – game logic UML (class diagram) for Mermaid Live Editor
+%% Copy from "classDiagram" through the final line into https://mermaid.live
+
+classDiagram
+    direction TB
+
+    %% ========== Domain model (com.splendor.model) ==========
+    class Card {
+        -String gemType
+        -String purchasePrice
+        -int prestigePoints
+        -int level
+        +getLevel() int
+        +getGemType() String
+        +getPrestigePoints() int
+        +getPurchasePrice() String
+        +getPrice(String) int
+    }
+
+    class Noble {
+        -String name
+        -String purchasePrice
+        -int prestigePoints
+        +getName() String
+        +getPurchasePrice() String
+        +getPrestigePoints() int
+        +getImageSlug() String
+    }
+
+    class Token {
+        -String gemType
+        +getGemType() String
+    }
+
+    class Player {
+        -int playerID
+        -boolean isHuman
+        -int prestigePoints
+        -ArrayList~Token~ tokens
+        -ArrayList~Card~ boughtCards
+        -ArrayList~Card~ reservedCards
+        -ArrayList~Noble~ nobles
+        +getTokens() List
+        +getBoughtCards() List
+        +getReservedCards() List
+        +getNobles() List
+        +addToken(Token)
+        +addBoughtCard(Card)
+        +addReservedCard(Card)
+        +deductTokens(String, int)
+    }
+
+    class TokenPile {
+        <<static board bank – CLI>>
+        +initialise(int playerCount)$
+        +getTokenCount(String)$
+        +addToken(String, int)$
+        +removeToken(String, int)$
+    }
+
+    class CardMarket {
+        <<static marketplace – CLI>>
+        +initialise()$
+        +getOpenLevel1()$ List~Card~
+        +getOpenLevel2()$ List~Card~
+        +getOpenLevel3()$ List~Card~
+    }
+
+    class NoblePool {
+        <<static noble supply – CLI>>
+        +initialise(int playerCount)$
+    }
+
+    class PlayerTurn {
+        -TurnInput input
+        -int maxTokenCount
+        +executeAction(Player)
+        -take3DifferentTokens(Player) int
+        -take2SameTokens(Player) int
+        -reserveCard(Player) int
+        -buyCard(Player) int
+        -canAfford(Player, Card) boolean
+        -processPurchase(Player, Card)
+    }
+
+    %% ========== CLI game (com.splendor.game) ==========
+    class DataLoader {
+        +getProperty(String) String
+        +readResourceFile(String) String
+    }
+
+    class GameState {
+        -ArrayList~Player~ players
+        -int currentPlayerIndex
+        -boolean gameOver
+        -boolean finalRound
+        -int pointsToWin
+        +playGame()
+        -playTurn()
+        -checkGameEnd()
+        -nextPlayer()
+    }
+
+    class GameDisplay {
+        <<utility>>
+        +displayPlayerState(Player)$
+        +displayCurrentBoardState()$
+    }
+
+    class MenuManager {
+        +main menu / setup
+    }
+
+    class TurnInput {
+        <<interface>>
+        +getActionChoice(Player) int
+        +isCPU() boolean
+    }
+
+    class HumanTurnInput {
+        -Scanner scanner
+    }
+
+    class CPUTurnInput {
+        -CPUStrategy strategy
+    }
+
+    class CPUStrategy {
+        +chooseAction(Player) int
+        +canAfford(Player, Card) boolean
+    }
+
+    class NobleAcquisition {
+        +resolveNobleVisit(...)
+    }
+
+    class InputHelper {
+        +getInt(...) int
+    }
+
+    %% ========== Web game logic (com.splendor.web) ==========
+    class GameSession {
+        <<Serializable>>
+        -Map~String,Integer~ tokenCounts
+        -List~Card~ openLevel1/2/3
+        -List~Card~ closedLevel1/2/3
+        -List~Noble~ availNobles
+        -List~Player~ players
+        -int currentPlayerIndex
+        -boolean gameOver
+        -int pointsToWin
+        -int maxTokensPerPlayer
+        +getCurrentPlayer() Player
+        +advanceToNextPlayer()
+    }
+
+    class GameService {
+        +newGame(...) GameSession
+        +take3Tokens(GameSession, List) boolean
+        +take2Tokens(GameSession, String) boolean
+        +reserveCardFromTable(...)
+        +buyCardFromTable(...)
+        +buyReservedCard(...)
+        +finishTurn(GameSession) Noble
+        +getCPUAction(GameSession) Object[]
+        -canAfford(Player, Card) boolean
+        -processPurchase(GameSession, Player, Card)
+    }
+
+    class WebCPUStrategy {
+        -GameSession session
+        +chooseAction(Player) int
+        -canAfford(Player, Card) boolean
+    }
+
+    %% ----- Domain composition -----
+    Player "1" *-- "0..*" Token : holds
+    Player "1" o-- "0..*" Card : bought / reserved
+    Player "1" o-- "0..*" Noble : acquired
+
+    %% ----- CLI static board -----
+    CardMarket ..> Card : displays & decks
+    NoblePool ..> Noble : available
+    TokenPile ..> DataLoader : reads config
+
+    %% ----- CLI turn flow -----
+    GameState "1" *-- "2..4" Player
+    GameState ..> PlayerTurn : uses per turn
+    GameState ..> GameDisplay : output
+    PlayerTurn --> TurnInput : uses
+    PlayerTurn ..> Player : mutates
+    PlayerTurn ..> CardMarket : reserve / buy
+    PlayerTurn ..> TokenPile : take / return
+    PlayerTurn ..> NobleAcquisition : nobles
+    HumanTurnInput ..|> TurnInput
+    CPUTurnInput ..|> TurnInput
+    CPUTurnInput --> CPUStrategy
+    CPUStrategy ..> CardMarket
+    CPUStrategy ..> TokenPile
+    CPUStrategy ..> Player
+    MenuManager ..> GameState : starts
+    MenuManager ..> CardMarket : initialise
+    MenuManager ..> NoblePool : initialise
+    MenuManager ..> TokenPile : initialise
+    DataLoader ..> CardMarket : loads CSV
+    DataLoader ..> NoblePool : loads CSV
+
+    %% ----- Web session (replaces static CLI board) -----
+    GameSession "1" *-- "2..4" Player
+    GameSession o-- "many" Card : open/closed
+    GameSession o-- "0..*" Noble : available
+
+    GameService ..> GameSession : mutates state
+    GameService ..> Player
+    GameService ..> Card
+    GameService ..> WebCPUStrategy : CPU decisions
+    WebCPUStrategy ..> GameSession : reads bank & market
+    WebCPUStrategy ..> Player
