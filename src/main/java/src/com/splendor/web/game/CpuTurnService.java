@@ -13,11 +13,13 @@ import java.util.List;
 @Service
 public class CpuTurnService {
 
-    private final WebGameRulesService rules;
+    private final WebTokenRulesService tokenRules;
+    private final WebCardRulesService cardRules;
     private final TurnPhaseService turnPhase;
 
-    public CpuTurnService(WebGameRulesService rules, TurnPhaseService turnPhase) {
-        this.rules = rules;
+    public CpuTurnService(WebTokenRulesService tokenRules, WebCardRulesService cardRules, TurnPhaseService turnPhase) {
+        this.tokenRules = tokenRules;
+        this.cardRules = cardRules;
         this.turnPhase = turnPhase;
     }
 
@@ -31,35 +33,35 @@ public class CpuTurnService {
 
         if (type == 1) {
             String colors = (String) action[1];
-            ok = rules.take3Tokens(gs, Arrays.asList(colors.split("\\s+")));
+            ok = tokenRules.take3Tokens(gs, Arrays.asList(colors.split("\\s+")));
             if (ok) log.add("CPU Player " + cpuId + ": Took 3 tokens (" + colors.replace(" ", ", ") + ")");
         } else if (type == 2) {
             String color = (String) action[1];
-            ok = rules.take2Tokens(gs, color);
+            ok = tokenRules.take2Tokens(gs, color);
             if (ok) log.add("CPU Player " + cpuId + ": Took 2 " + color + " tokens");
         } else if (type == 3) {
             String src = (String) action[1];
             int level = (Integer) action[2];
             if ("deck".equals(src)) {
-                ok = rules.reserveCardFromDeck(gs, level);
+                ok = cardRules.reserveCardFromDeck(gs, level);
                 if (ok) log.add("CPU Player " + cpuId + ": Reserved a card from Level " + level + " deck");
             } else {
                 int idx = (Integer) action[3];
-                ok = rules.reserveCardFromTable(gs, level, idx);
+                ok = cardRules.reserveCardFromTable(gs, level, idx);
                 if (ok) log.add("CPU Player " + cpuId + ": Reserved a Level " + level + " card from the table");
             }
         } else if (type == 4) {
             String src = (String) action[1];
             if ("reserved".equals(src)) {
                 int idx = (Integer) action[2];
-                ok = rules.buyReservedCard(gs, idx);
+                ok = cardRules.buyReservedCard(gs, idx);
                 if (ok) log.add("CPU Player " + cpuId + ": Bought a reserved card");
             } else {
                 int level = (Integer) action[2];
                 int idx = (Integer) action[3];
                 var cards = gs.getOpenCardsByLevel(level);
                 Card card = (cards != null && idx < cards.size()) ? cards.get(idx) : null;
-                ok = rules.buyCardFromTable(gs, level, idx);
+                ok = cardRules.buyCardFromTable(gs, level, idx);
                 if (ok && card != null) {
                     log.add("CPU Player " + cpuId + ": Bought a Level " + level + " " + card.getGemType() + " card (" + card.getPrestigePoints() + " pts)");
                 } else if (ok) {
@@ -87,7 +89,7 @@ public class CpuTurnService {
             for (String gem : toReturn) {
                 log.add("CPU Player " + cpuId + ": Returned 1 " + gem + " token (over limit)");
             }
-            rules.executeReturnTokens(gs, toReturn);
+            tokenRules.executeReturnTokens(gs, toReturn);
         }
 
         Noble acquired = turnPhase.finishTurn(gs);

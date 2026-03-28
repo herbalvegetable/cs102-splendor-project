@@ -7,6 +7,7 @@ import src.com.splendor.model.Player;
 import java.util.ArrayList;
 import java.util.List;
 
+/** Noble tiles (automatic visits from bonus gems). Separate from {@link WebCardRulesService} development cards. */
 @Service
 public class NobleAcquisitionService {
 

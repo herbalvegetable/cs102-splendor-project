@@ -6,25 +6,28 @@ import src.com.splendor.model.Noble;
 import java.util.List;
 
 /**
- * Web game façade: delegates to setup, rules, turn flow, CPU, and outcome services
+ * Web game façade: delegates to setup, token rules, card rules, turn flow, CPU, and outcome services
  * so controllers depend on one bean while logic stays split by responsibility.
  */
 @Service
 public class GameService {
 
     private final WebGameSetupService setup;
-    private final WebGameRulesService rules;
+    private final WebTokenRulesService tokenRules;
+    private final WebCardRulesService cardRules;
     private final TurnPhaseService turnPhase;
     private final CpuTurnService cpuTurn;
     private final GameOutcomeService outcomes;
 
     public GameService(WebGameSetupService setup,
-                       WebGameRulesService rules,
+                       WebTokenRulesService tokenRules,
+                       WebCardRulesService cardRules,
                        TurnPhaseService turnPhase,
                        CpuTurnService cpuTurn,
                        GameOutcomeService outcomes) {
         this.setup = setup;
-        this.rules = rules;
+        this.tokenRules = tokenRules;
+        this.cardRules = cardRules;
         this.turnPhase = turnPhase;
         this.cpuTurn = cpuTurn;
         this.outcomes = outcomes;
@@ -35,31 +38,31 @@ public class GameService {
     }
 
     public boolean take3Tokens(GameSession session, List<String> colors) {
-        return rules.take3Tokens(session, colors);
+        return tokenRules.take3Tokens(session, colors);
     }
 
     public boolean take2Tokens(GameSession session, String color) {
-        return rules.take2Tokens(session, color);
+        return tokenRules.take2Tokens(session, color);
     }
 
     public boolean reserveCardFromTable(GameSession session, int level, int index) {
-        return rules.reserveCardFromTable(session, level, index);
+        return cardRules.reserveCardFromTable(session, level, index);
     }
 
     public boolean reserveCardFromDeck(GameSession session, int level) {
-        return rules.reserveCardFromDeck(session, level);
+        return cardRules.reserveCardFromDeck(session, level);
     }
 
     public boolean buyCardFromTable(GameSession session, int level, int index) {
-        return rules.buyCardFromTable(session, level, index);
+        return cardRules.buyCardFromTable(session, level, index);
     }
 
     public boolean buyReservedCard(GameSession session, int reservedIndex) {
-        return rules.buyReservedCard(session, reservedIndex);
+        return cardRules.buyReservedCard(session, reservedIndex);
     }
 
     public void executeReturnTokens(GameSession session, List<String> tokensToReturn) {
-        rules.executeReturnTokens(session, tokensToReturn);
+        tokenRules.executeReturnTokens(session, tokensToReturn);
     }
 
     public Noble finishTurn(GameSession session) {
