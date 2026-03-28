@@ -60,7 +60,7 @@
                 </div>
             </section>
 
-            <!-- Center: Cards first (fill space), nobles sticky at bottom -->
+            <!-- Center: cards then nobles; whole column scrolls together -->
             <div class="board-center">
                 <section class="cards-section" aria-label="Development cards">
                 <div class="card-tier" id="tour-card-tier-1">
@@ -134,7 +134,7 @@
                 </div>
             </section>
 
-                <section class="nobles-section nobles-sticky" id="tour-nobles" aria-label="Nobles">
+                <section class="nobles-section" id="tour-nobles" aria-label="Nobles">
                     <h2>Nobles</h2>
                     <div class="noble-row">
                         <div th:each="noble : ${gameSession.getAvailNobles()}" class="noble-tile">

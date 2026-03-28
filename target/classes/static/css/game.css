@@ -209,10 +209,11 @@ body:has(.game-board) .game-nav.game-nav-top {
 }
 
 .cards-section {
-    flex: 1;
+    flex: 0 0 auto;
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
 }
 
 .cards-section .card-tier:first-child {
@@ -537,24 +538,17 @@ body:has(.game-board) .game-nav.game-nav-top {
     overflow: hidden;
 }
 
-/* Nobles – sticky to bottom of viewport, unlatches when scrolled to bottom */
+/* Nobles – below card tiers, scrolls with .board-center (not viewport-fixed) */
 .nobles-section {
+    flex: 0 0 auto;
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
     background: rgba(212, 168, 75, 0.08);
     padding: var(--space);
     border-radius: var(--radius);
     border: 1px solid rgba(212, 168, 75, 0.2);
-}
-
-.nobles-section.nobles-sticky {
-    position: sticky;
-    bottom: 0;
-    flex-shrink: 0;
-    z-index: 10;
-    background: var(--bg-dark);
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
 }
 
 .noble-row {
@@ -563,13 +557,20 @@ body:has(.game-board) .game-nav.game-nav-top {
     gap: var(--space-sm);
     justify-content: center;
     align-items: center;
-    overflow: hidden;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(212, 168, 75, 0.35) transparent;
 }
 
 .noble-row::-webkit-scrollbar {
-    display: none;
+    height: 6px;
+}
+
+.noble-row::-webkit-scrollbar-thumb {
+    background: rgba(212, 168, 75, 0.35);
+    border-radius: 3px;
 }
 
 .noble-tile {
