@@ -1141,135 +1141,35 @@ body:has(.game-board) .game-nav.game-nav-top {
     margin: 0 auto;
 }
 
-/* Index page */
-body.index-page {
+/* Game over page (game-over.html) */
+body:has(> .container .winner-section) {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
-    overflow-x: hidden;
-}
-
-.index-bg-wrapper {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    overflow: hidden;
-}
-
-@keyframes index-bg-pan {
-    from { background-position: 0% 50%; }
-    to { background-position: 100% 50%; }
-}
-
-/* All slides run the same pan animation from page load – they stay in sync.
-   We only toggle opacity; no position reset when switching images. */
-.index-bg {
-    position: absolute;
-    inset: 0;
-    background-color: var(--bg-dark);
-    background-size: 150%;
-    background-position: 0% 50%;
-    background-repeat: no-repeat;
-    filter: blur(12px) brightness(0.4);
-    transform: scale(1.2);
-    opacity: 0;
-    animation: index-bg-pan 20s linear infinite;
-    transition: opacity 2s ease-in-out;
-}
-
-.index-bg.active {
-    opacity: 1;
-}
-
-.index-bg-1 { background-image: url(../media/renaissance-bg.jpg); }
-.index-bg-2 { background-image: url(../media/renaissance-bg2.jpg); }
-.index-bg-3 { background-image: url(../media/renaissance-bg3.jpg); }
-.index-bg-4 { background-image: url(../media/renaissance-bg4.jpg); }
-
-.index-content {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    max-width: 420px;
     padding: var(--space);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
 }
 
-.index-logo {
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: 3.5rem;
-    font-weight: 700;
-    color: #e8d4a0;
-    letter-spacing: 0.2em;
-    text-align: center;
-    margin: 0 0 0.5rem 0;
-    text-shadow: 0 0 30px rgba(212, 168, 75, 0.6), 0 0 60px rgba(212, 168, 75, 0.3), 0 2px 4px rgba(0,0,0,0.9);
-}
-
-.setup-form {
-    background: var(--bg-elevated);
-    padding: var(--space);
-    border-radius: var(--radius);
-}
-
-.index-form {
+body:has(> .container .winner-section) > .container {
+    max-width: 480px;
     width: 100%;
-    background: rgba(35, 47, 62, 0.92);
-    border: 1px solid rgba(212, 168, 75, 0.3);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
 }
 
-.form-group {
-    margin-bottom: var(--space);
+body:has(> .container .winner-section) > .container > h1 {
+    color: var(--accent-gold);
+    margin-top: 0;
 }
 
-.form-group label {
-    display: block;
-    margin-bottom: 0.25rem;
-    color: var(--text-muted);
+.link-home {
+    display: inline-block;
+    margin-top: var(--space);
+    color: var(--accent-gold);
+    text-decoration: none;
+    font-weight: 600;
 }
 
-.form-group select {
-    width: 100%;
-    padding: 0.5rem;
-    font-size: 1rem;
-    background: var(--bg-dark);
-    color: var(--text-primary);
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: var(--radius-sm);
-}
-
-.hint {
-    color: var(--text-muted);
-    font-size: 0.85rem;
-    margin: 0.5rem 0 var(--space) 0;
-}
-
-.setup-form button {
-    width: 100%;
-    padding: 0.6rem;
-    font-size: 1rem;
-    background: var(--accent-gold);
-    color: var(--bg-dark);
-    border: none;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.subtitle {
-    text-align: center;
-    color: var(--text-muted);
-    margin-bottom: var(--space);
-}
-
-.index-content .subtitle {
-    font-size: 1rem;
-    color: rgba(255,255,255,0.85);
+.link-home:hover {
+    color: var(--accent-gold-hover);
 }
 
 /* Winner section */

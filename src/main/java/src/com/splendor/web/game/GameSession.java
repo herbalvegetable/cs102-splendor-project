@@ -1,18 +1,22 @@
 package src.com.splendor.web.game;
 
-import src.com.splendor.model.Card;
-import src.com.splendor.model.Noble;
-import src.com.splendor.model.Player;
+import src.com.splendor.web.game.model.Card;
+import src.com.splendor.web.game.model.Noble;
+import src.com.splendor.web.game.model.Player;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Holds per-game state for web sessions. Replaces static TokenPile, CardMarket, NoblePool.
+ * Player list order is turn order: index 0 goes first (youngest), last goes last (oldest).
  */
 public class GameSession implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final Map<String, Integer> tokenCounts = new HashMap<>();
     private final ArrayList<Card> closedLevel1 = new ArrayList<>();
@@ -30,8 +34,11 @@ public class GameSession implements Serializable {
     private final int pointsToWin;
     private final int maxTokensPerPlayer;
 
-    public GameSession(int humanCount, int cpuCount, int pointsToWin, int maxTokensPerPlayer,
-                      int tokenPerGem, int goldCount) {
+    /**
+     * @param playersInTurnOrder first = youngest (starts), last = oldest
+     */
+    public GameSession(List<PlayerSetup> playersInTurnOrder, int pointsToWin, int maxTokensPerPlayer,
+                       int tokenPerGem, int goldCount) {
         this.pointsToWin = pointsToWin;
         this.maxTokensPerPlayer = maxTokensPerPlayer;
 
@@ -40,8 +47,9 @@ public class GameSession implements Serializable {
         }
         tokenCounts.put("gold", goldCount);
 
-        for (int i = 1; i <= humanCount + cpuCount; i++) {
-            players.add(new Player(i, i <= humanCount));
+        int id = 1;
+        for (PlayerSetup setup : playersInTurnOrder) {
+            players.add(new Player(id++, setup.human(), setup.name()));
         }
     }
 

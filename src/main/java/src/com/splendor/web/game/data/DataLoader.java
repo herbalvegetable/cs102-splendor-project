@@ -1,4 +1,4 @@
-package src.com.splendor.game;
+package src.com.splendor.web.game.data;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+/** Loads {@code config.properties} and reads classpath resource files (cards, nobles). */
 public class DataLoader {
 
     private static Properties properties = new Properties();
@@ -40,4 +41,3 @@ public class DataLoader {
         }
     }
 }
-

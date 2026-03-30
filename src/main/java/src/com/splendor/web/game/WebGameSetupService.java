@@ -1,26 +1,30 @@
 package src.com.splendor.web.game;
 
 import org.springframework.stereotype.Service;
-import src.com.splendor.game.DataLoader;
-import src.com.splendor.model.Card;
-import src.com.splendor.model.Noble;
+import src.com.splendor.web.game.data.DataLoader;
+import src.com.splendor.web.game.model.Card;
+import src.com.splendor.web.game.model.Noble;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 @Service
 public class WebGameSetupService {
 
     private final DataLoader dataLoader = new DataLoader();
 
-    public GameSession newGame(int humanCount, int cpuCount) {
+    /**
+     * @param playersInTurnOrder first player is youngest (goes first); last is oldest
+     */
+    public GameSession newGame(List<PlayerSetup> playersInTurnOrder) {
+        int playerCount = playersInTurnOrder.size();
         int pointsToWin = Integer.parseInt(dataLoader.getProperty("game.pointsToWin"));
         int maxTokens = Integer.parseInt(dataLoader.getProperty("game.maxTokensPerPlayer"));
-        int playerCount = humanCount + cpuCount;
         int tokenPerGem = Integer.parseInt(dataLoader.getProperty("game.tokenCount." + playerCount + "players"));
         int goldCount = Integer.parseInt(dataLoader.getProperty("game.tokenCount.gold"));
 
-        GameSession session = new GameSession(humanCount, cpuCount, pointsToWin, maxTokens, tokenPerGem, goldCount);
+        GameSession session = new GameSession(playersInTurnOrder, pointsToWin, maxTokens, tokenPerGem, goldCount);
 
         loadCards(session);
         loadNobles(session, playerCount);

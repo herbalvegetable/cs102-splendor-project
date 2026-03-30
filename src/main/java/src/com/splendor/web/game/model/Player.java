@@ -1,5 +1,6 @@
-package src.com.splendor.model;
+package src.com.splendor.web.game.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -7,20 +8,32 @@ import java.util.List;
 /**
  * Represents a player's game state: tokens, cards, nobles, and prestige.
  */
-public class Player {
+public class Player implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private static final String[] TOKEN_ORDER = {"black", "blue", "green", "red", "white", "gold"};
     private final int playerID;
     private final boolean isHuman;
+    private final String displayName;
     private int prestigePoints = 0;
-    private ArrayList<Token> tokens = new ArrayList<Token>();
-    private ArrayList<Card> boughtCards = new ArrayList<Card>();
-    private ArrayList<Card> reservedCards = new ArrayList<Card>();
-    private ArrayList<Noble> nobles = new ArrayList<Noble>();
+    private ArrayList<Token> tokens = new ArrayList<>();
+    private ArrayList<Card> boughtCards = new ArrayList<>();
+    private ArrayList<Card> reservedCards = new ArrayList<>();
+    private ArrayList<Noble> nobles = new ArrayList<>();
 
-    public Player(int playerID, boolean isHuman) {
+    public Player(int playerID, boolean isHuman, String displayName) {
         this.playerID = playerID;
         this.isHuman = isHuman;
+        String t = displayName == null ? "" : displayName.trim();
+        if (t.length() > 48) {
+            t = t.substring(0, 48);
+        }
+        this.displayName = t.isEmpty() ? "Player " + playerID : t;
+    }
+
+    public String getDisplayName() {
+        return displayName;
     }
 
     public boolean isHuman() {
@@ -67,15 +80,15 @@ public class Player {
         tokens.add(token);
     }
 
-    public void addReservedCard(Card card){
+    public void addReservedCard(Card card) {
         this.reservedCards.add(card);
     }
 
-    public void removeReservedCard(Card card){
+    public void removeReservedCard(Card card) {
         this.reservedCards.remove(card);
     }
 
-    public void addBoughtCard(Card card){
+    public void addBoughtCard(Card card) {
         this.boughtCards.add(card);
         this.prestigePoints += card.getPrestigePoints();
     }
@@ -120,6 +133,10 @@ public class Player {
         return count;
     }
 
+    /**
+     * Removes tokens from the player by gem index. Does not update the bank;
+     * the web layer returns chips via GameSession when needed.
+     */
     public void removePlayerTokens(int gemTypeIndex, int numberOfTokens) {
         String[] gemTypes = {"black", "blue", "green", "red", "white", "gold"};
         String targetGem = gemTypes[gemTypeIndex];
@@ -129,7 +146,6 @@ public class Player {
         for (int i = getTokens().size() - 1; i >= 0 && removed < numberOfTokens; i--) {
             if (getTokens().get(i).getGemType().equals(targetGem)) {
                 getTokens().remove(i);
-                TokenPile.addToken(targetGem, 1);
                 removed++;
             }
         }
@@ -137,7 +153,7 @@ public class Player {
 
     /**
      * Removes tokens from player only (no addition to pile).
-     * Used by web GameService which adds to session separately.
+     * Used by web rules services which add to session separately.
      */
     public void deductTokens(String gemType, int numberOfTokens) {
         int removed = 0;

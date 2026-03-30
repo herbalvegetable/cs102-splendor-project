@@ -1,7 +1,7 @@
 package src.com.splendor.web.game;
 
 import org.springframework.stereotype.Service;
-import src.com.splendor.model.Player;
+import src.com.splendor.web.game.model.Player;
 
 import java.util.List;
 

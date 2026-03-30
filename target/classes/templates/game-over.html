@@ -12,8 +12,8 @@
             <h2>Final scores</h2>
             <ul>
                 <li th:each="player : ${gameSession.getPlayers()}">
-                    Player <span th:text="${player.getPlayerID()}">1</span>
-                    <span th:if="${player.isHuman()}">(You)</span>
+                    <span th:text="${player.getDisplayName()}">Name</span>
+                    <span th:if="${player.isHuman()}">(Human)</span>
                     <span th:unless="${player.isHuman()}">(CPU)</span>:
                     <strong th:text="${player.getPrestigePoints()}">0</strong> points
                 </li>
@@ -21,8 +21,8 @@
             <p class="winner-msg">
                 Winner(s):
                 <span th:each="p : ${gameSession.getPlayers()}" th:if="${winnerIds.contains(p.getPlayerID())}">
-                    Player <span th:text="${p.getPlayerID()}">1</span>
-                    <span th:if="${p.isHuman()}">(You)</span>
+                    <span th:text="${p.getDisplayName()}">Name</span>
+                    <span th:if="${p.isHuman()}">(Human)</span>
                     <span th:unless="${p.isHuman()}">(CPU)</span>
                 </span>
             </p>

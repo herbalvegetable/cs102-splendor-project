@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Splendor – CS102 Project</title>
-    <link rel="stylesheet" th:href="@{/css/game.css}" href="/css/game.css">
+    <link rel="stylesheet" th:href="@{/css/index.css}" href="/css/index.css">
 </head>
 <body class="index-page">
     <div class="index-bg-wrapper">
@@ -13,33 +13,26 @@
         <div class="index-bg index-bg-3" data-bg="3"></div>
         <div class="index-bg index-bg-4" data-bg="4"></div>
     </div>
-    <div class="index-content">
+    <div class="index-content index-content-wide">
         <h1 class="index-logo">SPLENDOR</h1>
         <p class="subtitle">Start a new game</p>
 
         <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
-        <form action="/new-game" method="post" class="setup-form index-form">
+        <form th:action="@{/new-game}" method="post" class="setup-form index-form" id="new-game-form">
+            <input type="hidden" name="playersJson" id="playersJson" value="">
             <div class="form-group">
-                <label for="humanCount">Human players</label>
-                <select id="humanCount" name="humanCount">
-                    <option value="1">1</option>
+                <label for="playerCount">Number of players</label>
+                <select id="playerCount" aria-describedby="order-hint">
                     <option value="2">2</option>
                     <option value="3">3</option>
                     <option value="4">4</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label for="cpuCount">CPU players</label>
-                <select id="cpuCount" name="cpuCount">
-                    <option value="0">0</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                </select>
-            </div>
-            <p class="hint">Total: 2–4 players</p>
-            <button type="submit">Start Game</button>
+            <p class="hint" id="order-hint">Drag players to set age order: <strong>top = youngest</strong> (goes first), <strong>bottom = oldest</strong> (goes last), per Splendor rules.</p>
+            <div class="player-slots-label">Players</div>
+            <div id="player-slots" class="player-slots" aria-label="Players in turn order, youngest first"></div>
+            <button type="submit" class="btn-start-game">Start Game</button>
         </form>
     </div>
     <script>
@@ -47,14 +40,120 @@
             var interval = 5000;
             var current = 0;
             var slides = document.querySelectorAll('.index-bg');
-            if (slides.length < 2) return;
-            function next() {
-                slides[current].classList.remove('active');
-                current = (current + 1) % slides.length;
-                slides[current].classList.add('active');
+            if (slides.length >= 2) {
+                function next() {
+                    slides[current].classList.remove('active');
+                    current = (current + 1) % slides.length;
+                    slides[current].classList.add('active');
+                }
+                slides[0].classList.add('active');
+                setInterval(next, interval);
             }
-            slides[0].classList.add('active');
-            setInterval(next, interval);
+        })();
+        (function() {
+            var slots = document.getElementById('player-slots');
+            var countSel = document.getElementById('playerCount');
+            var form = document.getElementById('new-game-form');
+            var hidden = document.getElementById('playersJson');
+
+            var FRUIT_NAMES = [
+                'Apple', 'Banana', 'Cherry', 'Date', 'Elderberry',
+                'Fig', 'Grape', 'Honeydew', 'Jackfruit', 'Kiwi',
+                'Lemon', 'Mango', 'Nectarine', 'Orange', 'Papaya'
+            ];
+
+            function randomFruitName() {
+                return FRUIT_NAMES[Math.floor(Math.random() * FRUIT_NAMES.length)];
+            }
+
+            function rowTemplate(index) {
+                var div = document.createElement('div');
+                div.className = 'player-row';
+                div.setAttribute('draggable', 'true');
+                div.innerHTML =
+                    '<div class="player-row-fields">' +
+                    '<span class="drag-handle" title="Drag to reorder" aria-hidden="true">⠿</span>' +
+                    '<label class="sr-only">Player ' + index + ' name</label>' +
+                    '<input type="text" class="player-name" maxlength="48" placeholder="Name" autocomplete="off" aria-label="Player ' + index + ' name">' +
+                    '<label class="sr-only">Player ' + index + ' type</label>' +
+                    '<select class="player-type" aria-label="Player ' + index + ' human or CPU">' +
+                    '<option value="human">Human</option>' +
+                    '<option value="cpu">CPU</option>' +
+                    '</select></div>';
+                div.querySelector('.player-name').value = randomFruitName();
+                return div;
+            }
+
+            function rebuildSlots(n) {
+                slots.innerHTML = '';
+                for (var i = 1; i <= n; i++) {
+                    slots.appendChild(rowTemplate(i));
+                }
+                wireDragDrop();
+            }
+
+            function wireDragDrop() {
+                var dragging = null;
+                slots.querySelectorAll('.player-row').forEach(function(row) {
+                    row.addEventListener('dragstart', function(e) {
+                        dragging = row;
+                        row.classList.add('dragging');
+                        e.dataTransfer.setData('text/plain', '');
+                        e.dataTransfer.effectAllowed = 'move';
+                    });
+                    row.addEventListener('dragend', function() {
+                        row.classList.remove('dragging');
+                        dragging = null;
+                        slots.querySelectorAll('.player-row').forEach(function(r) { r.classList.remove('drag-over'); });
+                    });
+                });
+                slots.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    var after = getDragAfterElement(slots, e.clientY);
+                    if (!dragging) return;
+                    if (after == null) {
+                        slots.appendChild(dragging);
+                    } else {
+                        slots.insertBefore(dragging, after);
+                    }
+                });
+            }
+
+            function getDragAfterElement(container, y) {
+                var rows = [].slice.call(container.querySelectorAll('.player-row:not(.dragging)'));
+                var closest = { offset: Number.NEGATIVE_INFINITY, element: null };
+                rows.forEach(function(child) {
+                    var box = child.getBoundingClientRect();
+                    var offset = y - box.top - box.height / 2;
+                    if (offset < 0 && offset > closest.offset) {
+                        closest = { offset: offset, element: child };
+                    }
+                });
+                return closest.element;
+            }
+
+            countSel.addEventListener('change', function() {
+                rebuildSlots(parseInt(countSel.value, 10));
+            });
+
+            form.addEventListener('submit', function(e) {
+                var rows = slots.querySelectorAll('.player-row');
+                var list = [];
+                rows.forEach(function(row) {
+                    var name = row.querySelector('.player-name').value;
+                    var human = row.querySelector('.player-type').value === 'human';
+                    list.push({ name: name, human: human });
+                });
+                if (list.length < 2 || list.length > 4) {
+                    e.preventDefault();
+                    alert('Need 2–4 players.');
+                    return false;
+                }
+                hidden.value = JSON.stringify(list);
+                return true;
+            });
+
+            rebuildSlots(2);
         })();
     </script>
 </body>

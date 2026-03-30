@@ -1,6 +1,6 @@
 package src.com.splendor.web.game;
 
-import src.com.splendor.model.Card;
+import src.com.splendor.web.game.model.Card;
 
 import java.util.ArrayList;
 import java.util.Random;

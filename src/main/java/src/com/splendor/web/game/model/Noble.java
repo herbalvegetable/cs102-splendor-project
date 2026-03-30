@@ -1,10 +1,13 @@
-package src.com.splendor.model;
+package src.com.splendor.web.game.model;
+
+import java.io.Serializable;
 
 /**
  * Represents a single noble tile in Splendor.
- * Contains only noble attributes - pool management is in NoblePool.
  */
-public class Noble {
+public class Noble implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final String name;
     private final String purchasePrice;

@@ -1,10 +1,13 @@
-package src.com.splendor.model;
+package src.com.splendor.web.game.model;
+
+import java.io.Serializable;
 
 /**
  * Represents a single development card in Splendor.
- * Contains only card attributes - deck management is in CardMarket.
  */
-public class Card {
+public class Card implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final String gemType;
     private final String purchasePrice;

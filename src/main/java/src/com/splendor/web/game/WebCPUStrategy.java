@@ -1,8 +1,8 @@
 package src.com.splendor.web.game;
 
-import src.com.splendor.model.Card;
-import src.com.splendor.model.Noble;
-import src.com.splendor.model.Player;
+import src.com.splendor.web.game.model.Card;
+import src.com.splendor.web.game.model.Noble;
+import src.com.splendor.web.game.model.Player;
 
 import java.util.ArrayList;
 import java.util.Collections;

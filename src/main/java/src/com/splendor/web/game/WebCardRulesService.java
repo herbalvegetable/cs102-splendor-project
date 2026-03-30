@@ -1,9 +1,9 @@
 package src.com.splendor.web.game;
 
 import org.springframework.stereotype.Service;
-import src.com.splendor.model.Card;
-import src.com.splendor.model.Player;
-import src.com.splendor.model.Token;
+import src.com.splendor.web.game.model.Card;
+import src.com.splendor.web.game.model.Player;
+import src.com.splendor.web.game.model.Token;
 
 import java.util.ArrayList;
 

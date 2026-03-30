@@ -1,0 +1,284 @@
+/* Home / new game (index.html) */
+
+:root {
+    --bg-dark: #0f1419;
+    --bg-card: #1a2332;
+    --bg-elevated: #232f3e;
+    --accent-gold: #d4a84b;
+    --accent-gold-hover: #e8c77b;
+    --text-primary: #f0f2f5;
+    --text-muted: #8b98a9;
+    --success: #2d8a5e;
+    --error: #c75c5c;
+    --warning: #d4a84b;
+    --black-gem: #2c3e50;
+    --blue-gem: #2980b9;
+    --green-gem: #27ae60;
+    --red-gem: #c0392b;
+    --white-gem: #ecf0f1;
+    --gold-gem: #f1c40f;
+    --radius: 8px;
+    --radius-sm: 4px;
+    --space: 1rem;
+    --space-sm: 0.5rem;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    margin: 0;
+    padding: var(--space);
+    min-height: 100vh;
+    line-height: 1.5;
+}
+
+.alert {
+    flex-shrink: 0;
+    padding: var(--space);
+    border-radius: var(--radius);
+    margin-bottom: var(--space);
+    width: 100%;
+}
+
+.alert-error {
+    background: rgba(199, 92, 92, 0.2);
+    border: 1px solid var(--error);
+    color: #e8a0a0;
+}
+
+.alert-success {
+    background: rgba(45, 138, 94, 0.2);
+    border: 1px solid var(--success);
+    color: #7dcea0;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    border: 0;
+}
+
+body.index-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow-x: hidden;
+}
+
+.index-bg-wrapper {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+}
+
+@keyframes index-bg-pan {
+    from { background-position: 0% 50%; }
+    to { background-position: 100% 50%; }
+}
+
+.index-bg {
+    position: absolute;
+    inset: 0;
+    background-color: var(--bg-dark);
+    background-size: 150%;
+    background-position: 0% 50%;
+    background-repeat: no-repeat;
+    filter: blur(12px) brightness(0.4);
+    transform: scale(1.2);
+    opacity: 0;
+    animation: index-bg-pan 20s linear infinite;
+    transition: opacity 2s ease-in-out;
+}
+
+.index-bg.active {
+    opacity: 1;
+}
+
+.index-bg-1 { background-image: url(../media/renaissance-bg.jpg); }
+.index-bg-2 { background-image: url(../media/renaissance-bg2.jpg); }
+.index-bg-3 { background-image: url(../media/renaissance-bg3.jpg); }
+.index-bg-4 { background-image: url(../media/renaissance-bg4.jpg); }
+
+.index-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+    padding: var(--space);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.index-content-wide {
+    max-width: 520px;
+}
+
+.index-logo {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #e8d4a0;
+    letter-spacing: 0.2em;
+    text-align: center;
+    margin: 0 0 0.5rem 0;
+    text-shadow: 0 0 30px rgba(212, 168, 75, 0.6), 0 0 60px rgba(212, 168, 75, 0.3), 0 2px 4px rgba(0,0,0,0.9);
+}
+
+.setup-form {
+    background: var(--bg-elevated);
+    padding: var(--space);
+    border-radius: var(--radius);
+}
+
+.index-form {
+    width: 100%;
+    background: rgba(35, 47, 62, 0.92);
+    border: 1px solid rgba(212, 168, 75, 0.3);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+.form-group {
+    margin-bottom: var(--space);
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--text-muted);
+}
+
+.form-group select {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: var(--radius-sm);
+}
+
+.hint {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin: 0.5rem 0 var(--space) 0;
+}
+
+.setup-form button,
+.btn-start-game {
+    width: 100%;
+    padding: 0.6rem;
+    font-size: 1rem;
+    background: var(--accent-gold);
+    color: var(--bg-dark);
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.player-slots-label {
+    font-size: 0.85rem;
+    color: var(--accent-gold);
+    margin: 0.75rem 0 0.35rem 0;
+    width: 100%;
+}
+
+.player-slots {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: var(--space);
+    min-height: 2rem;
+}
+
+.player-row {
+    display: block;
+    padding: 0.5rem 0.6rem;
+    background: var(--bg-dark);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-sm);
+    cursor: grab;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    margin-bottom: 1em;
+}
+
+.player-row.dragging {
+    opacity: 0.85;
+    cursor: grabbing;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+.player-row.drag-over {
+    border-color: var(--accent-gold);
+}
+
+.drag-handle {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    width: 1.75rem;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    line-height: 1;
+    user-select: none;
+}
+
+.player-row-fields {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    min-width: 0;
+}
+
+.player-row .player-name {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0.45rem 0.5rem;
+    font-size: 0.95rem;
+    background-color: var(--bg-elevated) !important;
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-sm);
+}
+
+.player-row .player-type {
+    flex: 0 0 auto;
+    padding: 0.45rem 0.5rem;
+    font-size: 0.9rem;
+    background-color: var(--bg-elevated) !important;
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-sm);
+}
+
+.subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    margin-bottom: var(--space);
+}
+
+.index-content .subtitle {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.85);
+}

@@ -165,7 +165,7 @@
             <div class="other-players-dropdown" id="other-players-dropdown" role="dialog" aria-hidden="true">
                 <button type="button" class="other-players-close" id="other-players-close" aria-label="Close">×</button>
                 <div th:each="player : ${gameSession.getPlayers()}" th:if="${player.getPlayerID() != gameSession.getCurrentPlayer().getPlayerID()}" class="other-player-view">
-                    <h2>Player <span th:text="${player.getPlayerID()}">2</span> <span th:text="${player.isHuman() ? '(Human)' : '(CPU)'}">(CPU)</span></h2>
+                    <h2><span th:text="${player.getDisplayName()}">Other</span> <span th:text="${player.isHuman() ? '(Human)' : '(CPU)'}">(CPU)</span></h2>
                     <p class="points-to-win">Points to win: <strong th:text="${gameSession.getPointsToWin()}">15</strong></p>
                     <div class="player-stats">
                         <div class="stat">
@@ -201,7 +201,7 @@
                 </div>
             </div>
             </th:block>
-            <h2>Player <span th:text="${gameSession.getCurrentPlayer().getPlayerID()}">1</span>'s Turn</h2>
+            <h2 th:text="|${gameSession.getCurrentPlayer().getDisplayName()}'s turn|">Alice's turn</h2>
             <p class="points-to-win">Points to win: <strong th:text="${gameSession.getPointsToWin()}">15</strong></p>
             <div th:if="${overTokenLimit}" class="turn-indicator return-needed">⚠ Return tokens (over limit)</div>
             <div class="player-stats">
@@ -538,7 +538,7 @@
                 {
                     target: 'tour-player-area',
                     title: 'Your Turn',
-                    body: 'Prestige: your total points. Tokens: how many you hold (max 10—return excess before ending your turn). Reserved: cards you have set aside (max 3). Bought cards give permanent gem bonuses; reserved cards can be bought later. When over the token limit, you must return tokens before doing anything else.'
+                    body: 'The heading shows whose turn it is (the names you chose on the home screen). Prestige: total points. Tokens: how many you hold (max 10—return excess before ending your turn). Reserved: cards set aside (max 3). Bought cards give permanent gem bonuses; reserved cards can be bought later. When over the token limit, return tokens before doing anything else.'
                 },
                 {
                     target: 'tour-actions',

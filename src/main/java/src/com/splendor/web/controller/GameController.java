@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import src.com.splendor.model.Player;
+import src.com.splendor.web.game.model.Player;
 import src.com.splendor.web.game.GameService;
 import src.com.splendor.web.game.GameSession;
 
@@ -48,7 +48,7 @@ public class GameController {
         List<String> log = gameService.executeOneCPUTurn(gs);
         model.addAttribute("gameSession", gs);
         model.addAttribute("cpuTurnLog", log);
-        model.addAttribute("cpuPlayerId", current.getPlayerID());
+        model.addAttribute("cpuPlayerName", current.getDisplayName());
         return "cpu-turn";
     }
 
