@@ -1,0 +1,5 @@
+com.splendor
+com.splendor.web.controller
+com.splendor.web.game
+com.splendor.web.game.data
+com.splendor.web.game.model
