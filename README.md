@@ -81,6 +81,38 @@ cs102-splendor-project/
 
 ---
 
+## Design Considerations
+
+- **Layered responsibilities:** HTTP handling lives in `web.controller` classes; domain state and rules live in `web.game` (facade, focused services, and `model`). That keeps request/response concerns separate from Splendor rules and makes the flow easier to follow and change.
+- **Facade over a split rule set:** `GameService` is the single entry point controllers use. It delegates to small services (`WebTokenRulesService`, `WebCardRulesService`, `TurnPhaseService`, `CpuTurnService`, and others) so each class has one main job instead of one monolithic game class.
+- **Stateful games without a database:** Each browser’s `HttpSession` holds one `GameSession` (Serializable). That matches a course-scale deployment (no DB setup) while still isolating one game per tab.
+- **One rules path for humans and CPUs:** CPU turns call the same token and card rule services as human actions, so behaviour stays consistent and fixes apply to both paths.
+- **Configuration and data outside code:** `config.properties` and CSV files drive counts, paths, cards, and nobles, so balancing and content tweaks rarely require recompiling Java.
+- **PRG and flash messages:** After `POST` actions, controllers redirect back to `GET` with flash attributes where appropriate, which avoids duplicate submits and keeps URLs bookmarkable for the main board view.
+- **Server-rendered UI:** Thymeleaf builds HTML on the server from the current `GameSession`, which simplifies state sync compared to a separate SPA talking to many JSON endpoints.
+
+---
+
+## Adherence to the Four OOP Principles
+
+### Encapsulation
+
+Domain classes (`Player`, `Card`, `Noble`, `Token`) keep fields **private** and expose behaviour through **getters** and methods that enforce invariants (for example token counts, prestige, and collections managed inside `Player`). `GameSession` bundles bank, market, and turn data behind accessors so controllers work with intentional operations instead of reaching into arbitrary fields. Services encapsulate **how** rules are enforced; controllers only orchestrate HTTP and call `GameService`.
+
+### Abstraction
+
+Controllers and `GameService` callers depend on **high-level operations** (`newGame`, take tokens, buy/reserve cards, finish turns) without needing to know every internal step. The **facade** (`GameService`) hides which underlying service handles each case. **Strategy-style** CPU decision logic in `WebCPUStrategy` abstracts “what should the CPU do?” from the mechanics in `CpuTurnService` that apply the chosen action through the shared rules services.
+
+### Inheritance
+
+The domain layer uses **little class extension**; game types are mostly concrete classes tailored to Splendor. The main shared **supertype contract** is **`Serializable`**: `GameSession` and model classes implement it so game state can live in the HTTP session as a single serialized graph. Application classes also participate in Spring’s component model (`@SpringBootApplication`, `@Controller`, `@Service`), which relies on the framework’s class hierarchy and metadata—our code focuses on **composition** (constructor-injected collaborators) rather than deep `extends` trees.
+
+### Polymorphism
+
+**Runtime dispatch** appears wherever the same API is used for different situations: human and CPU players are both represented as **`Player`** instances, and turn flow branches on `isHuman()` while reusing the same rule services. **Method overriding** (for example `toString()` on `Token`) lets logging and templates treat objects uniformly. **Spring dependency injection** resolves concrete `@Service` implementations behind constructor types, so the façade and controllers depend on abstractions at the API level while the container supplies the active implementations at runtime.
+
+---
+
 ## Game Logic
 
 ### Starting a New Game
