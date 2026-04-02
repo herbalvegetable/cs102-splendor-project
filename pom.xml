@@ -20,7 +20,7 @@
     <properties>
         <java.version>17</java.version>
         <!-- Required: GameState also has a main() for the CLI; otherwise spring-boot:run may not start the web app. -->
-        <start-class>src.com.splendor.SplendorApplication</start-class>
+        <start-class>com.splendor.SplendorApplication</start-class>
     </properties>
 
     <dependencies>
@@ -40,7 +40,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>src.com.splendor.SplendorApplication</mainClass>
+                    <mainClass>com.splendor.SplendorApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>
